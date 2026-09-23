@@ -1,0 +1,17 @@
+{
+  "language": "de",
+  "units": [
+    {
+      "start": 0.4,
+      "end": 4.2,
+      "text": "Entdecken Sie jetzt unsere neue Kollektion für den Herbst.",
+      "speaker": "S1"
+    },
+    {
+      "start": 4.9,
+      "end": 9.1,
+      "text": "Nur für kurze Zeit mit zwanzig Prozent Rabatt.",
+      "speaker": "S1"
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+/* Design system — brief §9.2 (valeurs reprises telles quelles). */
+:root {
+  /* Couleurs */
+  --color-bg:            #FAFAF7;
+  --color-surface:       #FFFFFF;
+  --color-surface-2:     #F1F0EB;
+  --color-text:          #1C1C1A;
+  --color-text-muted:    #6B6A64;
+  --color-border:        #E3E2DB;
+  --color-primary:       #1F6F5C;
+  --color-primary-hover: #185848;
+  --color-accent:        #E8A33D;
+  --color-danger:        #C8412B;
+  --color-success:       #2F8F5B;
+  --color-wave-original: #8A8983;
+  --color-wave-dubbed:   #1F6F5C;
+  /* Locuteurs (palette distincte, daltonisme-compatible) */
+  --speaker-1: #3B6EA8; --speaker-2: #C46A2B; --speaker-3: #7B5EA7;
+  --speaker-4: #2E8B7D; --speaker-5: #B04A7A; --speaker-6: #8C7A2E;
+
+  /* Typographie */
+  --font-ui:   "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --text-xs: 0.75rem; --text-sm: 0.875rem; --text-md: 1rem;
+  --text-lg: 1.25rem; --text-xl: 1.75rem; --text-2xl: 2.25rem;
+
+  /* Espacement (échelle 4 px) */
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+  --space-6: 24px; --space-8: 32px; --space-12: 48px;
+
+  /* Rayons, ombres */
+  --radius-sm: 6px; --radius-md: 10px; --radius-lg: 16px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.06);
+  --shadow-md: 0 4px 12px rgba(0,0,0,.08);
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --color-bg: #141412; --color-surface: #1C1C1A; --color-surface-2: #24241F;
+  --color-text: #EDECE6; --color-text-muted: #A19F96; --color-border: #33322C;
+  --color-primary: #3FA88A; --color-primary-hover: #55BC9E;
+  --color-wave-original: #6B6A64; --color-wave-dubbed: #3FA88A;
+  color-scheme: dark;
+}

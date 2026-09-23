@@ -1,0 +1,21 @@
+# Secrets
+.env
+
+# Données locales
+data/
+exports/
+samples/voices/
+samples/stems/
+
+# Python
+__pycache__/
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+
+# Node
+node_modules/
+frontend/dist/
+frontend/src/data/catalog.json
+*.tsbuildinfo

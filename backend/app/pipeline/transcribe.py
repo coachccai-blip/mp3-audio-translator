@@ -1,0 +1,134 @@
+"""Étape 3 — transcription horodatée (faster-whisper) et regroupement en unités de sens."""
+from __future__ import annotations
+
+import re
+from dataclasses import asdict, dataclass, field
+from functools import lru_cache
+from pathlib import Path
+
+MIN_UNIT_S = 2.0
+MAX_UNIT_S = 12.0
+PAUSE_BREAK_S = 0.7
+_SENTENCE_END = re.compile(r"[.!?…。！？]['\"»”)]*$")
+_CLAUSE_END = re.compile(r"[,;:，；：、]['\"»”)]*$")
+
+
+@dataclass
+class Word:
+    start: float
+    end: float
+    word: str
+
+
+@dataclass
+class Unit:
+    start: float
+    end: float
+    text: str
+    words: list[Word] = field(default_factory=list)
+    speaker: str = "S1"
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+
+@dataclass
+class Transcript:
+    language: str
+    language_probability: float
+    units: list[Unit]
+
+
+class TranscriptionUnavailable(Exception):
+    pass
+
+
+def _join(words: list[Word]) -> str:
+    text = "".join(w.word for w in words).strip()
+    return re.sub(r"\s+", " ", text)
+
+
+def group_words(words: list[Word], min_s: float = MIN_UNIT_S, max_s: float = MAX_UNIT_S,
+                pause_s: float = PAUSE_BREAK_S) -> list[Unit]:
+    """Regroupe les mots en unités de 2 à 12 s, coupées entre deux mots (jamais au milieu)."""
+    units: list[Unit] = []
+    cur: list[Word] = []
+
+    def flush(ws: list[Word]):
+        if ws:
+            units.append(Unit(start=ws[0].start, end=ws[-1].end, text=_join(ws), words=list(ws)))
+
+    for i, w in enumerate(words):
+        if cur and w.end - cur[0].start > max_s:
+            # Couper au meilleur endroit précédent : fin de phrase, puis proposition, puis plus grande pause.
+            cut = None
+            for pattern in (_SENTENCE_END, _CLAUSE_END):
+                for j in range(len(cur) - 1, 0, -1):
+                    if pattern.search(cur[j].word.strip()) and cur[j].end - cur[0].start >= min_s:
+                        cut = j + 1
+                        break
+                if cut:
+                    break
+            if cut is None:
+                gaps = [(cur[j + 1].start - cur[j].end, j + 1) for j in range(len(cur) - 1)]
+                cut = max(gaps)[1] if gaps else len(cur)
+            flush(cur[:cut])
+            cur = cur[cut:]
+        cur.append(w)
+        dur = cur[-1].end - cur[0].start
+        nxt = words[i + 1] if i + 1 < len(words) else None
+        gap = (nxt.start - w.end) if nxt else 0.0
+        if dur >= min_s and (_SENTENCE_END.search(w.word.strip()) or gap >= pause_s):
+            flush(cur)
+            cur = []
+        elif nxt is not None and gap >= 2.0:
+            # Longue pause : on coupe même si l'unité est courte (on ne fusionne pas à travers un silence).
+            flush(cur)
+            cur = []
+    flush(cur)
+    return units
+
+
+def whisper_available() -> bool:
+    try:
+        import faster_whisper  # noqa: F401
+        return True
+    except Exception:
+        return False
+
+
+@lru_cache(maxsize=2)
+def _model(name: str, device: str):
+    from faster_whisper import WhisperModel
+
+    dev = "auto" if device == "auto" else ("cuda" if device == "cuda" else "cpu")
+    compute = "float16" if dev == "cuda" else "int8"
+    return WhisperModel(name, device=dev, compute_type=compute if dev != "auto" else "default")
+
+
+def transcribe(path: Path, model_name: str = "large-v3", device: str = "auto", language: str | None = None,
+               on_unit=None) -> Transcript:
+    if not whisper_available():
+        raise TranscriptionUnavailable("faster-whisper n'est pas installé (pip install -e \".[ai]\").")
+    model = _model(model_name, device)
+    segments, info = model.transcribe(str(path), language=language, word_timestamps=True, vad_filter=True)
+    words: list[Word] = []
+    for seg in segments:
+        for w in seg.words or []:
+            words.append(Word(start=float(w.start), end=float(w.end), word=w.word))
+        if on_unit:
+            on_unit(seg.text.strip())
+    return Transcript(language=info.language, language_probability=float(info.language_probability),
+                      units=group_words(words))
+
+
+def detect_language(path: Path, model_name: str = "large-v3", device: str = "auto") -> tuple[str, float] | None:
+    """Détection rapide de la langue source (30 premières secondes)."""
+    if not whisper_available():
+        return None
+    from faster_whisper.audio import decode_audio
+
+    model = _model(model_name, device)
+    audio = decode_audio(str(path), sampling_rate=16000)[: 16000 * 30]
+    lang, prob, _ = model.detect_language(audio)
+    return lang, float(prob)

@@ -1,0 +1,505 @@
+# Catalogue de voix NATIVES uniquement (voir brief §4.1).
+# - Aucune voix « Multilingual », aucun clonage.
+# - Identifiants Azure à CONFIRMER : lancez `python scripts/sync_azure_voices.py` pour vérifier
+#   chaque identifiant contre l'API Azure (voices/list) avant usage en production.
+# - `validated_by` / `validated_on` : à remplir après écoute humaine (`python scripts/audition.py`).
+#   Tant que DOUBLR_REQUIRE_VALIDATED_VOICES=true, seules les voix validées sont proposées.
+
+fr-FR:
+  - id: azure:fr-FR-DeniseNeural
+    provider: azure
+    display_name: Denise
+    gender: female
+    age_range: adult
+    styles: [neutral, warm]
+    sample: samples/voices/fr-FR-denise.mp3
+    validated_by: null
+    validated_on: null
+    status: to_confirm
+    default: true
+  - id: azure:fr-FR-HenriNeural
+    provider: azure
+    display_name: Henri
+    gender: male
+    age_range: adult
+    styles: [neutral, narrative]
+    sample: samples/voices/fr-FR-henri.mp3
+    validated_by: null
+    validated_on: null
+    status: to_confirm
+  - id: azure:fr-FR-EloiseNeural
+    provider: azure
+    display_name: Eloise
+    gender: female
+    age_range: adult
+    styles: [energetic]
+    sample: samples/voices/fr-FR-eloise.mp3
+    validated_by: null
+    validated_on: null
+    status: to_confirm
+  - id: azure:fr-FR-AlainNeural
+    provider: azure
+    display_name: Alain
+    gender: male
+    age_range: adult
+    styles: [warm]
+    sample: samples/voices/fr-FR-alain.mp3
+    validated_by: null
+    validated_on: null
+    status: to_confirm
+fr-CA:
+  - id: azure:fr-CA-SylvieNeural
+    provider: azure
+    display_name: Sylvie
+    gender: female
+    age_range: adult
+    styles: [neutral]
+    sample: samples/voices/fr-CA-sylvie.mp3
+    validated_by: null
+    validated_on: null
+    status: to_confirm
+    default: true
+  - id: azure:fr-CA-JeanNeural
+    provider: azure
+    display_name: Jean
+    gender: male
+    age_range: adult
+    styles: [neutral]
+    sample: samples/voices/fr-CA-jean.mp3
+    validated_by: null
+    validated_on: null
+    status: to_confirm
+fr-BE:
+  - id: azure:fr-BE-CharlineNeural
+    provider: azure
+    display_name: Charline
+    gender: female
+    age_range: adult
+    styles: [neutral]
+    sample: samples/voices/fr-BE-charline.mp3
+    validated_by: null
+    validated_on: null
+    status: to_confirm
+    default: true
+  - id: azure:fr-BE-GerardNeural
+    provider: azure
+    display_name: Gerard
+    gender: male
+    age_range: adult
+    styles: [neutral]
+    sample: samples/voices/fr-BE-gerard.mp3
+    validated_by: null
+    validated_on: null
+    status: to_confirm
+fr-CH:
+  - id: azure:fr-CH-ArianeNeural
+    provider: azure
+    display_name: Ariane
+    gender: female
+    age_range: adult
+    styles: [neutral]
+    sample: samples/voices/fr-CH-ariane.mp3
+    validated_by: null
+    validated_on: null
+    status: to_confirm
+    default: true
+  - id: azure:fr-CH-FabriceNeural
+    provider: azure
+    display_name: Fabrice
+    gender: male
+    age_range: adult
+    styles: [neutral]
+    sample: samples/voices/fr-CH-fabrice.mp3
+    validated_by: null
+    validated_on: null
+    status: to_confirm
+en-US:
+  - id: azure:en-US-JennyNeural
+    provider: azure
+    display_name: Jenny
+    gender: female
+    age_range: adult
+    styles: [neutral, warm]
+    sample: samples/voices/en-US-jenny.mp3
+    validated_by: null
+    validated_on: null
+    status: to_confirm
+    default: true
+  - id: azure:en-US-GuyNeural
+    provider: azure
+    display_name: Guy
+    gender: male
+    age_range: adult
+    styles: [neutral, narrative]
+    sample: samples/voices/en-US-guy.mp3
+    validated_by: null
+    validated_on: null
+    status: to_confirm
+  - id: azure:en-US-AriaNeural
+    provider: azure
+    display_name: Aria
+    gender: female
+    age_range: adult
+    styles: [energetic]
+    sample: samples/voices/en-US-aria.mp3
+    validated_by: null
+    validated_on: null
+    status: to_confirm
+  - id: azure:en-US-DavisNeural
+    provider: azure
+    display_name: Davis
+    gender: male
+    age_range: adult
+    styles: [warm]
+    sample: samples/voices/en-US-davis.mp3
+    validated_by: null
+    validated_on: null
+    status: to_confirm
+en-GB:
+  - id: azure:en-GB-SoniaNeural
+    provider: azure
+    display_name: Sonia
+    gender: female
+    age_range: adult
+    styles: [neutral]
+    sample: samples/voices/en-GB-sonia.mp3
+    validated_by: null
+    validated_on: null
+    status: to_confirm
+    default: true
+  - id: azure:en-GB-RyanNeural
+    provider: azure
+    display_name: Ryan
+    gender: male
+    age_range: adult
+    styles: [neutral]
+    sample: samples/voices/en-GB-ryan.mp3
+    validated_by: null
+    validated_on: null
+    status: to_confirm
+en-AU:
+  - id: azure:en-AU-NatashaNeural
+    provider: azure
+    display_name: Natasha
+    gender: female
+    age_range: adult
+    styles: [neutral]
+    sample: samples/voices/en-AU-natasha.mp3
+    validated_by: null
+    validated_on: null
+    status: to_confirm
+    default: true
+  - id: azure:en-AU-WilliamNeural
+    provider: azure
+    display_name: William
+    gender: male
+    age_range: adult
+    styles: [neutral]
+    sample: samples/voices/en-AU-william.mp3
+    validated_by: null
+    validated_on: null
+    status: to_confirm
+en-IE:
+  - id: azure:en-IE-EmilyNeural
+    provider: azure
+    display_name: Emily
+    gender: female
+    age_range: adult
+    styles: [neutral]
+    sample: samples/voices/en-IE-emily.mp3
+    validated_by: null
+    validated_on: null
+    status: to_confirm
+    default: true
+  - id: azure:en-IE-ConnorNeural
+    provider: azure
+    display_name: Connor
+    gender: male
+    age_range: adult
+    styles: [neutral]
+    sample: samples/voices/en-IE-connor.mp3
+    validated_by: null
+    validated_on: null
+    status: to_confirm
+zh-CN:
+  - id: azure:zh-CN-XiaoxiaoNeural
+    provider: azure
+    display_name: Xiaoxiao
+    gender: female
+    age_range: adult
+    styles: [neutral, warm]
+    sample: samples/voices/zh-CN-xiaoxiao.mp3
+    validated_by: null
+    validated_on: null
+    status: to_confirm
+    default: true
+  - id: azure:zh-CN-YunxiNeural
+    provider: azure
+    display_name: Yunxi
+    gender: male
+    age_range: adult
+    styles: [neutral, narrative]
+    sample: samples/voices/zh-CN-yunxi.mp3
+    validated_by: null
+    validated_on: null
+    status: to_confirm
+zh-TW:
+  - id: azure:zh-TW-HsiaoChenNeural
+    provider: azure
+    display_name: HsiaoChen
+    gender: female
+    age_range: adult
+    styles: [neutral]
+    sample: samples/voices/zh-TW-hsiaochen.mp3
+    validated_by: null
+    validated_on: null
+    status: to_confirm
+    default: true
+  - id: azure:zh-TW-YunJheNeural
+    provider: azure
+    display_name: YunJhe
+    gender: male
+    age_range: adult
+    styles: [neutral]
+    sample: samples/voices/zh-TW-yunjhe.mp3
+    validated_by: null
+    validated_on: null
+    status: to_confirm
+de-DE:
+  - id: azure:de-DE-KatjaNeural
+    provider: azure
+    display_name: Katja
+    gender: female
+    age_range: adult
+    styles: [neutral]
+    sample: samples/voices/de-DE-katja.mp3
+    validated_by: null
+    validated_on: null
+    status: to_confirm
+    default: true
+  - id: azure:de-DE-ConradNeural
+    provider: azure
+    display_name: Conrad
+    gender: male
+    age_range: adult
+    styles: [neutral, narrative]
+    sample: samples/voices/de-DE-conrad.mp3
+    validated_by: null
+    validated_on: null
+    status: to_confirm
+  - id: azure:de-DE-AmalaNeural
+    provider: azure
+    display_name: Amala
+    gender: female
+    age_range: adult
+    styles: [warm]
+    sample: samples/voices/de-DE-amala.mp3
+    validated_by: null
+    validated_on: null
+    status: to_confirm
+  - id: azure:de-DE-KillianNeural
+    provider: azure
+    display_name: Killian
+    gender: male
+    age_range: adult
+    styles: [energetic]
+    sample: samples/voices/de-DE-killian.mp3
+    validated_by: null
+    validated_on: null
+    status: to_confirm
+de-AT:
+  - id: azure:de-AT-IngridNeural
+    provider: azure
+    display_name: Ingrid
+    gender: female
+    age_range: adult
+    styles: [neutral]
+    sample: samples/voices/de-AT-ingrid.mp3
+    validated_by: null
+    validated_on: null
+    status: to_confirm
+    default: true
+  - id: azure:de-AT-JonasNeural
+    provider: azure
+    display_name: Jonas
+    gender: male
+    age_range: adult
+    styles: [neutral]
+    sample: samples/voices/de-AT-jonas.mp3
+    validated_by: null
+    validated_on: null
+    status: to_confirm
+de-CH:
+  - id: azure:de-CH-LeniNeural
+    provider: azure
+    display_name: Leni
+    gender: female
+    age_range: adult
+    styles: [neutral]
+    sample: samples/voices/de-CH-leni.mp3
+    validated_by: null
+    validated_on: null
+    status: to_confirm
+    default: true
+  - id: azure:de-CH-JanNeural
+    provider: azure
+    display_name: Jan
+    gender: male
+    age_range: adult
+    styles: [neutral]
+    sample: samples/voices/de-CH-jan.mp3
+    validated_by: null
+    validated_on: null
+    status: to_confirm
+sv-SE:
+  - id: azure:sv-SE-SofieNeural
+    provider: azure
+    display_name: Sofie
+    gender: female
+    age_range: adult
+    styles: [neutral]
+    sample: samples/voices/sv-SE-sofie.mp3
+    validated_by: null
+    validated_on: null
+    status: to_confirm
+    default: true
+  - id: azure:sv-SE-MattiasNeural
+    provider: azure
+    display_name: Mattias
+    gender: male
+    age_range: adult
+    styles: [neutral]
+    sample: samples/voices/sv-SE-mattias.mp3
+    validated_by: null
+    validated_on: null
+    status: to_confirm
+es-ES:
+  - id: azure:es-ES-ElviraNeural
+    provider: azure
+    display_name: Elvira
+    gender: female
+    age_range: adult
+    styles: [neutral]
+    sample: samples/voices/es-ES-elvira.mp3
+    validated_by: null
+    validated_on: null
+    status: to_confirm
+    default: true
+  - id: azure:es-ES-AlvaroNeural
+    provider: azure
+    display_name: Alvaro
+    gender: male
+    age_range: adult
+    styles: [neutral, narrative]
+    sample: samples/voices/es-ES-alvaro.mp3
+    validated_by: null
+    validated_on: null
+    status: to_confirm
+  - id: azure:es-ES-AbrilNeural
+    provider: azure
+    display_name: Abril
+    gender: female
+    age_range: adult
+    styles: [warm]
+    sample: samples/voices/es-ES-abril.mp3
+    validated_by: null
+    validated_on: null
+    status: to_confirm
+  - id: azure:es-ES-ArnauNeural
+    provider: azure
+    display_name: Arnau
+    gender: male
+    age_range: adult
+    styles: [energetic]
+    sample: samples/voices/es-ES-arnau.mp3
+    validated_by: null
+    validated_on: null
+    status: to_confirm
+es-MX:
+  - id: azure:es-MX-DaliaNeural
+    provider: azure
+    display_name: Dalia
+    gender: female
+    age_range: adult
+    styles: [neutral]
+    sample: samples/voices/es-MX-dalia.mp3
+    validated_by: null
+    validated_on: null
+    status: to_confirm
+    default: true
+  - id: azure:es-MX-JorgeNeural
+    provider: azure
+    display_name: Jorge
+    gender: male
+    age_range: adult
+    styles: [neutral]
+    sample: samples/voices/es-MX-jorge.mp3
+    validated_by: null
+    validated_on: null
+    status: to_confirm
+es-AR:
+  - id: azure:es-AR-ElenaNeural
+    provider: azure
+    display_name: Elena
+    gender: female
+    age_range: adult
+    styles: [neutral]
+    sample: samples/voices/es-AR-elena.mp3
+    validated_by: null
+    validated_on: null
+    status: to_confirm
+    default: true
+  - id: azure:es-AR-TomasNeural
+    provider: azure
+    display_name: Tomas
+    gender: male
+    age_range: adult
+    styles: [neutral]
+    sample: samples/voices/es-AR-tomas.mp3
+    validated_by: null
+    validated_on: null
+    status: to_confirm
+it-IT:
+  - id: azure:it-IT-ElsaNeural
+    provider: azure
+    display_name: Elsa
+    gender: female
+    age_range: adult
+    styles: [neutral]
+    sample: samples/voices/it-IT-elsa.mp3
+    validated_by: null
+    validated_on: null
+    status: to_confirm
+    default: true
+  - id: azure:it-IT-DiegoNeural
+    provider: azure
+    display_name: Diego
+    gender: male
+    age_range: adult
+    styles: [neutral]
+    sample: samples/voices/it-IT-diego.mp3
+    validated_by: null
+    validated_on: null
+    status: to_confirm
+pl-PL:
+  - id: azure:pl-PL-ZofiaNeural
+    provider: azure
+    display_name: Zofia
+    gender: female
+    age_range: adult
+    styles: [neutral]
+    sample: samples/voices/pl-PL-zofia.mp3
+    validated_by: null
+    validated_on: null
+    status: to_confirm
+    default: true
+  - id: azure:pl-PL-MarekNeural
+    provider: azure
+    display_name: Marek
+    gender: male
+    age_range: adult
+    styles: [neutral]
+    sample: samples/voices/pl-PL-marek.mp3
+    validated_by: null
+    validated_on: null
+    status: to_confirm
