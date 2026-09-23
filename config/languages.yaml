@@ -1,0 +1,63 @@
+# Langues cibles supportées. Les débits (syllabes/s) sont des valeurs de départ :
+# recalibrez-les avec `python scripts/calibrate_rate.py` sur le TTS réellement utilisé.
+languages:
+  fr:
+    native_name: "Français"
+    names: { fr: "Français", en: "French", zh: "法语", de: "Französisch", sv: "Franska", es: "Francés", it: "Francese", pl: "Francuski" }
+    default_locale: fr-FR
+    variants:
+      fr-FR: { flag: "🇫🇷", label: "France", syllables_per_sec: 5.2 }
+      fr-CA: { flag: "🇨🇦", label: "Canada", syllables_per_sec: 5.0 }
+      fr-BE: { flag: "🇧🇪", label: "Belgique", syllables_per_sec: 5.0 }
+      fr-CH: { flag: "🇨🇭", label: "Suisse", syllables_per_sec: 4.9 }
+  en:
+    native_name: "English"
+    names: { fr: "Anglais", en: "English", zh: "英语", de: "Englisch", sv: "Engelska", es: "Inglés", it: "Inglese", pl: "Angielski" }
+    default_locale: en-US
+    variants:
+      en-US: { flag: "🇺🇸", label: "United States", syllables_per_sec: 4.3 }
+      en-GB: { flag: "🇬🇧", label: "United Kingdom", syllables_per_sec: 4.3 }
+      en-AU: { flag: "🇦🇺", label: "Australia", syllables_per_sec: 4.3 }
+      en-IE: { flag: "🇮🇪", label: "Ireland", syllables_per_sec: 4.4 }
+  zh:
+    native_name: "中文"
+    names: { fr: "Chinois (mandarin)", en: "Chinese (Mandarin)", zh: "中文（普通话）", de: "Chinesisch (Mandarin)", sv: "Kinesiska (mandarin)", es: "Chino (mandarín)", it: "Cinese (mandarino)", pl: "Chiński (mandaryński)" }
+    default_locale: zh-CN
+    count_unit: characters
+    variants:
+      zh-CN: { flag: "🇨🇳", label: "中国大陆", syllables_per_sec: 4.6 }
+      zh-TW: { flag: "🇹🇼", label: "台灣", syllables_per_sec: 4.4 }
+  de:
+    native_name: "Deutsch"
+    names: { fr: "Allemand", en: "German", zh: "德语", de: "Deutsch", sv: "Tyska", es: "Alemán", it: "Tedesco", pl: "Niemiecki" }
+    default_locale: de-DE
+    variants:
+      de-DE: { flag: "🇩🇪", label: "Deutschland", syllables_per_sec: 4.6 }
+      de-AT: { flag: "🇦🇹", label: "Österreich", syllables_per_sec: 4.5 }
+      de-CH: { flag: "🇨🇭", label: "Schweiz", syllables_per_sec: 4.4 }
+  sv:
+    native_name: "Svenska"
+    names: { fr: "Suédois", en: "Swedish", zh: "瑞典语", de: "Schwedisch", sv: "Svenska", es: "Sueco", it: "Svedese", pl: "Szwedzki" }
+    default_locale: sv-SE
+    variants:
+      sv-SE: { flag: "🇸🇪", label: "Sverige", syllables_per_sec: 4.4 }
+  es:
+    native_name: "Español"
+    names: { fr: "Espagnol", en: "Spanish", zh: "西班牙语", de: "Spanisch", sv: "Spanska", es: "Español", it: "Spagnolo", pl: "Hiszpański" }
+    default_locale: es-ES
+    variants:
+      es-ES: { flag: "🇪🇸", label: "España", syllables_per_sec: 5.5 }
+      es-MX: { flag: "🇲🇽", label: "México", syllables_per_sec: 5.3 }
+      es-AR: { flag: "🇦🇷", label: "Argentina", syllables_per_sec: 5.3 }
+  it:
+    native_name: "Italiano"
+    names: { fr: "Italien", en: "Italian", zh: "意大利语", de: "Italienisch", sv: "Italienska", es: "Italiano", it: "Italiano", pl: "Włoski" }
+    default_locale: it-IT
+    variants:
+      it-IT: { flag: "🇮🇹", label: "Italia", syllables_per_sec: 5.3 }
+  pl:
+    native_name: "Polski"
+    names: { fr: "Polonais", en: "Polish", zh: "波兰语", de: "Polnisch", sv: "Polska", es: "Polaco", it: "Polacco", pl: "Polski" }
+    default_locale: pl-PL
+    variants:
+      pl-PL: { flag: "🇵🇱", label: "Polska", syllables_per_sec: 4.8 }

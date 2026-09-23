@@ -1,0 +1,23 @@
+{
+  "language": "en",
+  "units": [
+    {
+      "start": 0.5,
+      "end": 4.8,
+      "text": "Welcome to the training module on workplace safety.",
+      "speaker": "S1"
+    },
+    {
+      "start": 5.5,
+      "end": 10.1,
+      "text": "In the next few minutes you will learn the three key rules.",
+      "speaker": "S1"
+    },
+    {
+      "start": 10.8,
+      "end": 14.2,
+      "text": "Let's get started with the first one.",
+      "speaker": "S1"
+    }
+  ]
+}

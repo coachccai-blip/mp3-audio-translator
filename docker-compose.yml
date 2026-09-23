@@ -1,0 +1,19 @@
+# Optionnel : lance le backend (API sur :8000) et le frontend (sur :5173).
+services:
+  backend:
+    image: python:3.11-slim
+    working_dir: /app/backend
+    volumes: [".:/app"]
+    env_file: .env
+    environment:
+      DOUBLR_CORS_ORIGINS: http://localhost:5173
+    command: >
+      sh -c "apt-get update && apt-get install -y --no-install-recommends ffmpeg rubberband-cli libsndfile1 &&
+             pip install -e '.[ai]' && uvicorn app.main:app --host 0.0.0.0 --port 8000"
+    ports: ["8000:8000"]
+  frontend:
+    image: node:22-slim
+    working_dir: /app/frontend
+    volumes: [".:/app"]
+    command: sh -c "npm ci && npm run dev -- --host 0.0.0.0"
+    ports: ["5173:5173"]
