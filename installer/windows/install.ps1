@@ -14,7 +14,7 @@ $Root   = Join-Path $env:LOCALAPPDATA 'Doublr'
 $App    = Join-Path $Root 'app'
 $Tools  = Join-Path $Root 'tools'
 $Log    = Join-Path $Root 'install.log'
-$Total  = 8
+$Total  = 9
 
 New-Item -ItemType Directory -Force -Path $Root, $Tools | Out-Null
 "=== Installation $(Get-Date) ===" | Out-File -FilePath $Log -Append -Encoding utf8
@@ -46,7 +46,8 @@ Write-Host ''
 Write-Host '  Doublr — installation' -ForegroundColor Cyan
 Write-Host '  Doublage audio par IA, voix natives, durée identique.'
 Write-Host "  Dossier : $Root"
-Write-Host '  Durée : 15 à 40 minutes selon votre connexion (environ 6 Go à télécharger).'
+Write-Host '  Durée : 20 à 60 minutes selon votre connexion (environ 12 Go à télécharger).'
+Write-Host '  Doublr fonctionnera gratuitement, sans aucune clé.'
 
 # --- 1. Python ----------------------------------------------------------------
 Step 1 'Python 3.11'
@@ -134,7 +135,7 @@ Remove-Item Env:\VITE_SAME_ORIGIN
 Pop-Location
 
 # --- 6. Modèles ------------------------------------------------------------------------
-Step 6 'Téléchargement des modèles (Whisper large-v3 ≈ 3 Go, Demucs ≈ 80 Mo)'
+Step 6 'Téléchargement des modèles (Whisper ≈ 3 Go, Demucs, voix Kokoro et Piper ≈ 1,5 Go)'
 # (Script Python dédié : PowerShell 5 retire les guillemets des arguments passés à un programme.)
 Invoke-Logged $VPy @((Join-Path $App 'scripts\download_models.py')) 'Le téléchargement des modèles'
 
@@ -161,11 +162,12 @@ $Docs = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'Doublr'
 Set-EnvValue 'DOUBLR_OUTPUT_DIR' $Docs
 Set-EnvValue 'DOUBLR_DEVICE' $(if ($Gpu) { 'cuda' } else { 'cpu' })
 Info "Vos fichiers doublés iront dans : $Docs"
-Info 'Collez vos clés API (clic droit pour coller). Laissez vide pour passer : vous pourrez les saisir plus tard dans Réglages.'
+Info 'Doublr est gratuit sans clé (traduction et voix calculées sur votre ordinateur).'
+Info 'Facultatif, pour une qualité supérieure : collez une clé (clic droit pour coller), ou laissez vide et appuyez sur Entrée.'
 $keys = [ordered]@{
-    'ANTHROPIC_API_KEY'  = 'Clé Anthropic (traduction, console.anthropic.com)'
-    'AZURE_SPEECH_KEY'   = 'Clé Azure Speech (voix, portal.azure.com)'
-    'HF_TOKEN'           = 'Jeton Hugging Face (facultatif : plusieurs locuteurs)'
+    'ANTHROPIC_API_KEY'  = 'Clé Anthropic (traduction premium, payante)'
+    'AZURE_SPEECH_KEY'   = 'Clé Azure Speech (400+ voix premium, gratuit jusqu''à 500 000 caractères/mois)'
+    'HF_TOKEN'           = 'Jeton Hugging Face (gratuit : distinguer plusieurs locuteurs)'
 }
 foreach ($k in $(if ($NonInteractive) { @() } else { $keys.Keys })) {
     $current = Get-EnvValue $k
@@ -179,13 +181,42 @@ if (-not $NonInteractive -and (Get-EnvValue 'AZURE_SPEECH_KEY')) {
     if ($region) { Set-EnvValue 'AZURE_SPEECH_REGION' $region.Trim() }
 }
 
-# --- 8. Raccourcis -------------------------------------------------------------------------
-Step 8 'Raccourcis'
+# --- 8. Traducteur local gratuit (Ollama) ----------------------------------------------------
+$LocalLlm = Get-EnvValue 'DOUBLR_LOCAL_LLM'
+if (-not $LocalLlm) { $LocalLlm = 'gemma3:4b'; Set-EnvValue 'DOUBLR_LOCAL_LLM' $LocalLlm }
+Step 8 "Traducteur gratuit (Ollama + modèle $LocalLlm ≈ 3 Go)"
+$OllamaDir = Join-Path $Tools 'ollama'
+$OllamaExe = Join-Path $OllamaDir 'ollama.exe'
+$OllamaModels = Join-Path $Root 'ollama-models'
+if (-not (Test-Path $OllamaExe)) {
+    Info 'Téléchargement d''Ollama…'
+    $zip = Join-Path $env:TEMP 'ollama-windows-amd64.zip'
+    Get-File 'https://github.com/ollama/ollama/releases/latest/download/ollama-windows-amd64.zip' $zip
+    New-Item -ItemType Directory -Force -Path $OllamaDir | Out-Null
+    Expand-Archive -Path $zip -DestinationPath $OllamaDir -Force
+    Remove-Item $zip -Force
+}
+function Test-Ollama { try { Invoke-RestMethod -Uri 'http://127.0.0.1:11434/api/tags' -TimeoutSec 2 | Out-Null; return $true } catch { return $false } }
+$env:OLLAMA_MODELS = $OllamaModels
+$Server = $null
+if (-not (Test-Ollama)) {
+    $Server = Start-Process -FilePath $OllamaExe -ArgumentList 'serve' -WindowStyle Hidden -PassThru
+    for ($i = 0; $i -lt 60 -and -not (Test-Ollama); $i++) { Start-Sleep 1 }
+    if (-not (Test-Ollama)) { Fail 'Ollama ne démarre pas.' }
+}
+Info "Téléchargement du modèle de traduction $LocalLlm (plusieurs minutes)…"
+Invoke-Logged $OllamaExe @('pull', $LocalLlm) 'Le téléchargement du modèle de traduction'
+if ($Server) { Stop-Process -Id $Server.Id -Force -ErrorAction SilentlyContinue }
+
+# --- 9. Raccourcis -------------------------------------------------------------------------
+Step 9 'Raccourcis'
 $Launcher = Join-Path $Root 'Doublr.bat'
 @(
     '@echo off',
     'title Doublr',
     'set PYTHONUTF8=1',
+    "set OLLAMA_MODELS=$OllamaModels",
+    "start `"Ollama`" /min `"$OllamaExe`" serve",
     "cd /d `"$(Join-Path $App 'backend')`"",
     'echo.',
     'echo   Doublr demarre. Laissez cette fenetre ouverte pendant que vous utilisez Doublr.',

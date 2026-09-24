@@ -13,7 +13,7 @@ on:
 jobs:
   install-and-dub:
     runs-on: windows-latest
-    timeout-minutes: 90
+    timeout-minutes: 150
     steps:
       - uses: actions/checkout@v4
 
@@ -22,6 +22,7 @@ jobs:
         run: |
           Add-Type -AssemblyName System.Speech
           $s = New-Object System.Speech.Synthesis.SpeechSynthesizer
+          try { $s.SelectVoiceByHints([System.Speech.Synthesis.VoiceGender]::Female) } catch { }
           $s.SetOutputToWaveFile("$env:RUNNER_TEMP\parole.wav")
           $s.Speak("Welcome to this short training module. Today we will learn three simple rules to stay safe at work. Let's get started with the first one.")
           $s.Dispose()
@@ -41,12 +42,20 @@ jobs:
         shell: powershell
         run: Get-Content "$env:LOCALAPPDATA\Doublr\install.log" -Tail 80 -ErrorAction SilentlyContinue
 
-      - name: Doublage de bout en bout avec les vrais modèles
+      - name: Doublage gratuit de bout en bout (Demucs, Whisper, Ollama, Kokoro, Piper)
         shell: powershell
         run: |
-          $py = "$env:LOCALAPPDATA\Doublr\app\.venv\Scripts\python.exe"
-          & $py "$env:LOCALAPPDATA\Doublr\app\scripts\smoke_test.py" "$env:RUNNER_TEMP\parole.wav" --to fr-FR
-          if ($LASTEXITCODE -ne 0) { exit 1 }
+          $root = "$env:LOCALAPPDATA\Doublr"
+          $env:OLLAMA_MODELS = "$root\ollama-models"
+          $srv = Start-Process -FilePath "$root\tools\ollama\ollama.exe" -ArgumentList 'serve' -WindowStyle Hidden -PassThru
+          Start-Sleep 8
+          $py = "$root\app\.venv\Scripts\python.exe"
+          Push-Location "$root\app"
+          & $py scripts\smoke_test.py "$env:RUNNER_TEMP\parole.wav" --to fr-FR --to de-DE --to zh-CN
+          $code = $LASTEXITCODE
+          Pop-Location
+          Stop-Process -Id $srv.Id -Force -ErrorAction SilentlyContinue
+          if ($code -ne 0) { exit 1 }
 
       - name: Le raccourci démarre le serveur et l'interface
         shell: powershell

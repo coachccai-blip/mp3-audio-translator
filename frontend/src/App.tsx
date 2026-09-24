@@ -96,7 +96,7 @@ export default function App() {
         )}
         {route.name === "home" && missingKeys.length > 0 && (
           <Banner tone="warning" action={<a className="btn-secondary btn-sm" href="#/settings">{t("banner.goSettings")}</a>}>
-            {t("banner.missingKeys", { keys: missingKeys.join(", ") })}
+            {(missingKeys.includes("LOCAL_LLM") ? t("banner.localLlm") : t("banner.missingKeys", { keys: missingKeys.join(", ") }))}
           </Banner>
         )}
         {screenTitle && (

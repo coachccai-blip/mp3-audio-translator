@@ -1,505 +1,1348 @@
 # Catalogue de voix NATIVES uniquement (voir brief §4.1).
-# - Aucune voix « Multilingual », aucun clonage.
-# - Identifiants Azure à CONFIRMER : lancez `python scripts/sync_azure_voices.py` pour vérifier
-#   chaque identifiant contre l'API Azure (voices/list) avant usage en production.
-# - `validated_by` / `validated_on` : à remplir après écoute humaine (`python scripts/audition.py`).
+# - Aucune voix « Multilingual », aucun clonage, aucun jeu de données multi-locuteurs ou non natif.
+# - Fournisseurs :
+#     kokoro  gratuit, local, HD 24 kHz (Kokoro-82M, Apache 2.0)
+#     piper   gratuit, local (voix VITS ; licence propre à chaque voix, voir son MODEL_CARD)
+#     azure   clé AZURE_SPEECH_KEY (identifiants à CONFIRMER : `python scripts/sync_azure_voices.py`)
+#   Une voix n'est proposée que si son fournisseur est utilisable (installé ou clé renseignée).
+# - quality : hd | standard. gender « unknown » = non vérifié.
+# - `validated_by` / `validated_on` : à remplir après écoute par un locuteur natif (`python scripts/audition.py`).
 #   Tant que DOUBLR_REQUIRE_VALIDATED_VOICES=true, seules les voix validées sont proposées.
 
 fr-FR:
-  - id: azure:fr-FR-DeniseNeural
-    provider: azure
-    display_name: Denise
-    gender: female
-    age_range: adult
-    styles: [neutral, warm]
-    sample: samples/voices/fr-FR-denise.mp3
-    validated_by: null
-    validated_on: null
-    status: to_confirm
-    default: true
-  - id: azure:fr-FR-HenriNeural
-    provider: azure
-    display_name: Henri
-    gender: male
-    age_range: adult
-    styles: [neutral, narrative]
-    sample: samples/voices/fr-FR-henri.mp3
-    validated_by: null
-    validated_on: null
-    status: to_confirm
-  - id: azure:fr-FR-EloiseNeural
-    provider: azure
-    display_name: Eloise
-    gender: female
-    age_range: adult
-    styles: [energetic]
-    sample: samples/voices/fr-FR-eloise.mp3
-    validated_by: null
-    validated_on: null
-    status: to_confirm
-  - id: azure:fr-FR-AlainNeural
-    provider: azure
-    display_name: Alain
-    gender: male
-    age_range: adult
-    styles: [warm]
-    sample: samples/voices/fr-FR-alain.mp3
-    validated_by: null
-    validated_on: null
-    status: to_confirm
+- id: azure:fr-FR-DeniseNeural
+  provider: azure
+  display_name: Denise
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  - warm
+  sample: samples/voices/fr-FR-denise.mp3
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+  default: true
+- id: azure:fr-FR-HenriNeural
+  provider: azure
+  display_name: Henri
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  - narrative
+  sample: samples/voices/fr-FR-henri.mp3
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: azure:fr-FR-EloiseNeural
+  provider: azure
+  display_name: Eloise
+  gender: female
+  age_range: adult
+  styles:
+  - energetic
+  sample: samples/voices/fr-FR-eloise.mp3
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: azure:fr-FR-AlainNeural
+  provider: azure
+  display_name: Alain
+  gender: male
+  age_range: adult
+  styles:
+  - warm
+  sample: samples/voices/fr-FR-alain.mp3
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: kokoro:ff_siwis
+  provider: kokoro
+  display_name: Siwis
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  quality: hd
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: piper:fr_FR-siwis-medium
+  provider: piper
+  display_name: Siwis
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  quality: standard
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: piper:fr_FR-tom-medium
+  provider: piper
+  display_name: Tom
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  quality: standard
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: piper:fr_FR-gilles-low
+  provider: piper
+  display_name: Gilles
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  quality: standard
+  validated_by: null
+  validated_on: null
+  status: to_confirm
 fr-CA:
-  - id: azure:fr-CA-SylvieNeural
-    provider: azure
-    display_name: Sylvie
-    gender: female
-    age_range: adult
-    styles: [neutral]
-    sample: samples/voices/fr-CA-sylvie.mp3
-    validated_by: null
-    validated_on: null
-    status: to_confirm
-    default: true
-  - id: azure:fr-CA-JeanNeural
-    provider: azure
-    display_name: Jean
-    gender: male
-    age_range: adult
-    styles: [neutral]
-    sample: samples/voices/fr-CA-jean.mp3
-    validated_by: null
-    validated_on: null
-    status: to_confirm
+- id: azure:fr-CA-SylvieNeural
+  provider: azure
+  display_name: Sylvie
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  sample: samples/voices/fr-CA-sylvie.mp3
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+  default: true
+- id: azure:fr-CA-JeanNeural
+  provider: azure
+  display_name: Jean
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  sample: samples/voices/fr-CA-jean.mp3
+  validated_by: null
+  validated_on: null
+  status: to_confirm
 fr-BE:
-  - id: azure:fr-BE-CharlineNeural
-    provider: azure
-    display_name: Charline
-    gender: female
-    age_range: adult
-    styles: [neutral]
-    sample: samples/voices/fr-BE-charline.mp3
-    validated_by: null
-    validated_on: null
-    status: to_confirm
-    default: true
-  - id: azure:fr-BE-GerardNeural
-    provider: azure
-    display_name: Gerard
-    gender: male
-    age_range: adult
-    styles: [neutral]
-    sample: samples/voices/fr-BE-gerard.mp3
-    validated_by: null
-    validated_on: null
-    status: to_confirm
+- id: azure:fr-BE-CharlineNeural
+  provider: azure
+  display_name: Charline
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  sample: samples/voices/fr-BE-charline.mp3
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+  default: true
+- id: azure:fr-BE-GerardNeural
+  provider: azure
+  display_name: Gerard
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  sample: samples/voices/fr-BE-gerard.mp3
+  validated_by: null
+  validated_on: null
+  status: to_confirm
 fr-CH:
-  - id: azure:fr-CH-ArianeNeural
-    provider: azure
-    display_name: Ariane
-    gender: female
-    age_range: adult
-    styles: [neutral]
-    sample: samples/voices/fr-CH-ariane.mp3
-    validated_by: null
-    validated_on: null
-    status: to_confirm
-    default: true
-  - id: azure:fr-CH-FabriceNeural
-    provider: azure
-    display_name: Fabrice
-    gender: male
-    age_range: adult
-    styles: [neutral]
-    sample: samples/voices/fr-CH-fabrice.mp3
-    validated_by: null
-    validated_on: null
-    status: to_confirm
+- id: azure:fr-CH-ArianeNeural
+  provider: azure
+  display_name: Ariane
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  sample: samples/voices/fr-CH-ariane.mp3
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+  default: true
+- id: azure:fr-CH-FabriceNeural
+  provider: azure
+  display_name: Fabrice
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  sample: samples/voices/fr-CH-fabrice.mp3
+  validated_by: null
+  validated_on: null
+  status: to_confirm
 en-US:
-  - id: azure:en-US-JennyNeural
-    provider: azure
-    display_name: Jenny
-    gender: female
-    age_range: adult
-    styles: [neutral, warm]
-    sample: samples/voices/en-US-jenny.mp3
-    validated_by: null
-    validated_on: null
-    status: to_confirm
-    default: true
-  - id: azure:en-US-GuyNeural
-    provider: azure
-    display_name: Guy
-    gender: male
-    age_range: adult
-    styles: [neutral, narrative]
-    sample: samples/voices/en-US-guy.mp3
-    validated_by: null
-    validated_on: null
-    status: to_confirm
-  - id: azure:en-US-AriaNeural
-    provider: azure
-    display_name: Aria
-    gender: female
-    age_range: adult
-    styles: [energetic]
-    sample: samples/voices/en-US-aria.mp3
-    validated_by: null
-    validated_on: null
-    status: to_confirm
-  - id: azure:en-US-DavisNeural
-    provider: azure
-    display_name: Davis
-    gender: male
-    age_range: adult
-    styles: [warm]
-    sample: samples/voices/en-US-davis.mp3
-    validated_by: null
-    validated_on: null
-    status: to_confirm
+- id: azure:en-US-JennyNeural
+  provider: azure
+  display_name: Jenny
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  - warm
+  sample: samples/voices/en-US-jenny.mp3
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+  default: true
+- id: azure:en-US-GuyNeural
+  provider: azure
+  display_name: Guy
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  - narrative
+  sample: samples/voices/en-US-guy.mp3
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: azure:en-US-AriaNeural
+  provider: azure
+  display_name: Aria
+  gender: female
+  age_range: adult
+  styles:
+  - energetic
+  sample: samples/voices/en-US-aria.mp3
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: azure:en-US-DavisNeural
+  provider: azure
+  display_name: Davis
+  gender: male
+  age_range: adult
+  styles:
+  - warm
+  sample: samples/voices/en-US-davis.mp3
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: kokoro:af_heart
+  provider: kokoro
+  display_name: Heart
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  quality: hd
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: kokoro:af_bella
+  provider: kokoro
+  display_name: Bella
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  quality: hd
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: kokoro:af_nicole
+  provider: kokoro
+  display_name: Nicole
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  quality: hd
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: kokoro:af_sarah
+  provider: kokoro
+  display_name: Sarah
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  quality: hd
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: kokoro:af_sky
+  provider: kokoro
+  display_name: Sky
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  quality: hd
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: kokoro:af_nova
+  provider: kokoro
+  display_name: Nova
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  quality: hd
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: kokoro:af_river
+  provider: kokoro
+  display_name: River
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  quality: hd
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: kokoro:af_alloy
+  provider: kokoro
+  display_name: Alloy
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  quality: hd
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: kokoro:af_aoede
+  provider: kokoro
+  display_name: Aoede
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  quality: hd
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: kokoro:af_jessica
+  provider: kokoro
+  display_name: Jessica
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  quality: hd
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: kokoro:af_kore
+  provider: kokoro
+  display_name: Kore
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  quality: hd
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: kokoro:am_michael
+  provider: kokoro
+  display_name: Michael
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  quality: hd
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: kokoro:am_fenrir
+  provider: kokoro
+  display_name: Fenrir
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  quality: hd
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: kokoro:am_puck
+  provider: kokoro
+  display_name: Puck
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  quality: hd
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: kokoro:am_adam
+  provider: kokoro
+  display_name: Adam
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  quality: hd
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: kokoro:am_echo
+  provider: kokoro
+  display_name: Echo
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  quality: hd
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: kokoro:am_eric
+  provider: kokoro
+  display_name: Eric
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  quality: hd
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: kokoro:am_liam
+  provider: kokoro
+  display_name: Liam
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  quality: hd
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: kokoro:am_onyx
+  provider: kokoro
+  display_name: Onyx
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  quality: hd
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: piper:en_US-lessac-high
+  provider: piper
+  display_name: Lessac
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  quality: hd
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: piper:en_US-ryan-high
+  provider: piper
+  display_name: Ryan
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  quality: hd
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: piper:en_US-ljspeech-high
+  provider: piper
+  display_name: LJ
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  quality: hd
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: piper:en_US-amy-medium
+  provider: piper
+  display_name: Amy
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  quality: standard
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: piper:en_US-kristin-medium
+  provider: piper
+  display_name: Kristin
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  quality: standard
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: piper:en_US-hfc_female-medium
+  provider: piper
+  display_name: HFC F
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  quality: standard
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: piper:en_US-hfc_male-medium
+  provider: piper
+  display_name: HFC M
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  quality: standard
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: piper:en_US-joe-medium
+  provider: piper
+  display_name: Joe
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  quality: standard
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: piper:en_US-john-medium
+  provider: piper
+  display_name: John
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  quality: standard
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: piper:en_US-bryce-medium
+  provider: piper
+  display_name: Bryce
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  quality: standard
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: piper:en_US-norman-medium
+  provider: piper
+  display_name: Norman
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  quality: standard
+  validated_by: null
+  validated_on: null
+  status: to_confirm
 en-GB:
-  - id: azure:en-GB-SoniaNeural
-    provider: azure
-    display_name: Sonia
-    gender: female
-    age_range: adult
-    styles: [neutral]
-    sample: samples/voices/en-GB-sonia.mp3
-    validated_by: null
-    validated_on: null
-    status: to_confirm
-    default: true
-  - id: azure:en-GB-RyanNeural
-    provider: azure
-    display_name: Ryan
-    gender: male
-    age_range: adult
-    styles: [neutral]
-    sample: samples/voices/en-GB-ryan.mp3
-    validated_by: null
-    validated_on: null
-    status: to_confirm
+- id: azure:en-GB-SoniaNeural
+  provider: azure
+  display_name: Sonia
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  sample: samples/voices/en-GB-sonia.mp3
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+  default: true
+- id: azure:en-GB-RyanNeural
+  provider: azure
+  display_name: Ryan
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  sample: samples/voices/en-GB-ryan.mp3
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: kokoro:bf_emma
+  provider: kokoro
+  display_name: Emma
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  quality: hd
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: kokoro:bf_isabella
+  provider: kokoro
+  display_name: Isabella
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  quality: hd
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: kokoro:bf_alice
+  provider: kokoro
+  display_name: Alice
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  quality: hd
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: kokoro:bf_lily
+  provider: kokoro
+  display_name: Lily
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  quality: hd
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: kokoro:bm_george
+  provider: kokoro
+  display_name: George
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  quality: hd
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: kokoro:bm_fable
+  provider: kokoro
+  display_name: Fable
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  quality: hd
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: kokoro:bm_lewis
+  provider: kokoro
+  display_name: Lewis
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  quality: hd
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: kokoro:bm_daniel
+  provider: kokoro
+  display_name: Daniel
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  quality: hd
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: piper:en_GB-cori-high
+  provider: piper
+  display_name: Cori
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  quality: hd
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: piper:en_GB-alan-medium
+  provider: piper
+  display_name: Alan
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  quality: standard
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: piper:en_GB-alba-medium
+  provider: piper
+  display_name: Alba
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  quality: standard
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+  note: accent écossais
+- id: piper:en_GB-northern_english_male-medium
+  provider: piper
+  display_name: Northern
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  quality: standard
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+  note: accent du nord de l'Angleterre
 en-AU:
-  - id: azure:en-AU-NatashaNeural
-    provider: azure
-    display_name: Natasha
-    gender: female
-    age_range: adult
-    styles: [neutral]
-    sample: samples/voices/en-AU-natasha.mp3
-    validated_by: null
-    validated_on: null
-    status: to_confirm
-    default: true
-  - id: azure:en-AU-WilliamNeural
-    provider: azure
-    display_name: William
-    gender: male
-    age_range: adult
-    styles: [neutral]
-    sample: samples/voices/en-AU-william.mp3
-    validated_by: null
-    validated_on: null
-    status: to_confirm
+- id: azure:en-AU-NatashaNeural
+  provider: azure
+  display_name: Natasha
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  sample: samples/voices/en-AU-natasha.mp3
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+  default: true
+- id: azure:en-AU-WilliamNeural
+  provider: azure
+  display_name: William
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  sample: samples/voices/en-AU-william.mp3
+  validated_by: null
+  validated_on: null
+  status: to_confirm
 en-IE:
-  - id: azure:en-IE-EmilyNeural
-    provider: azure
-    display_name: Emily
-    gender: female
-    age_range: adult
-    styles: [neutral]
-    sample: samples/voices/en-IE-emily.mp3
-    validated_by: null
-    validated_on: null
-    status: to_confirm
-    default: true
-  - id: azure:en-IE-ConnorNeural
-    provider: azure
-    display_name: Connor
-    gender: male
-    age_range: adult
-    styles: [neutral]
-    sample: samples/voices/en-IE-connor.mp3
-    validated_by: null
-    validated_on: null
-    status: to_confirm
+- id: azure:en-IE-EmilyNeural
+  provider: azure
+  display_name: Emily
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  sample: samples/voices/en-IE-emily.mp3
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+  default: true
+- id: azure:en-IE-ConnorNeural
+  provider: azure
+  display_name: Connor
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  sample: samples/voices/en-IE-connor.mp3
+  validated_by: null
+  validated_on: null
+  status: to_confirm
 zh-CN:
-  - id: azure:zh-CN-XiaoxiaoNeural
-    provider: azure
-    display_name: Xiaoxiao
-    gender: female
-    age_range: adult
-    styles: [neutral, warm]
-    sample: samples/voices/zh-CN-xiaoxiao.mp3
-    validated_by: null
-    validated_on: null
-    status: to_confirm
-    default: true
-  - id: azure:zh-CN-YunxiNeural
-    provider: azure
-    display_name: Yunxi
-    gender: male
-    age_range: adult
-    styles: [neutral, narrative]
-    sample: samples/voices/zh-CN-yunxi.mp3
-    validated_by: null
-    validated_on: null
-    status: to_confirm
+- id: azure:zh-CN-XiaoxiaoNeural
+  provider: azure
+  display_name: Xiaoxiao
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  - warm
+  sample: samples/voices/zh-CN-xiaoxiao.mp3
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+  default: true
+- id: azure:zh-CN-YunxiNeural
+  provider: azure
+  display_name: Yunxi
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  - narrative
+  sample: samples/voices/zh-CN-yunxi.mp3
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: kokoro:zf_xiaoxiao
+  provider: kokoro
+  display_name: Xiaoxiao
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  quality: hd
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: kokoro:zf_xiaobei
+  provider: kokoro
+  display_name: Xiaobei
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  quality: hd
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: kokoro:zf_xiaoni
+  provider: kokoro
+  display_name: Xiaoni
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  quality: hd
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: kokoro:zf_xiaoyi
+  provider: kokoro
+  display_name: Xiaoyi
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  quality: hd
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: kokoro:zm_yunxi
+  provider: kokoro
+  display_name: Yunxi
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  quality: hd
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: kokoro:zm_yunjian
+  provider: kokoro
+  display_name: Yunjian
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  quality: hd
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: kokoro:zm_yunxia
+  provider: kokoro
+  display_name: Yunxia
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  quality: hd
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: kokoro:zm_yunyang
+  provider: kokoro
+  display_name: Yunyang
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  quality: hd
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: piper:zh_CN-huayan-medium
+  provider: piper
+  display_name: Huayan
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  quality: standard
+  validated_by: null
+  validated_on: null
+  status: to_confirm
 zh-TW:
-  - id: azure:zh-TW-HsiaoChenNeural
-    provider: azure
-    display_name: HsiaoChen
-    gender: female
-    age_range: adult
-    styles: [neutral]
-    sample: samples/voices/zh-TW-hsiaochen.mp3
-    validated_by: null
-    validated_on: null
-    status: to_confirm
-    default: true
-  - id: azure:zh-TW-YunJheNeural
-    provider: azure
-    display_name: YunJhe
-    gender: male
-    age_range: adult
-    styles: [neutral]
-    sample: samples/voices/zh-TW-yunjhe.mp3
-    validated_by: null
-    validated_on: null
-    status: to_confirm
+- id: azure:zh-TW-HsiaoChenNeural
+  provider: azure
+  display_name: HsiaoChen
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  sample: samples/voices/zh-TW-hsiaochen.mp3
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+  default: true
+- id: azure:zh-TW-YunJheNeural
+  provider: azure
+  display_name: YunJhe
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  sample: samples/voices/zh-TW-yunjhe.mp3
+  validated_by: null
+  validated_on: null
+  status: to_confirm
 de-DE:
-  - id: azure:de-DE-KatjaNeural
-    provider: azure
-    display_name: Katja
-    gender: female
-    age_range: adult
-    styles: [neutral]
-    sample: samples/voices/de-DE-katja.mp3
-    validated_by: null
-    validated_on: null
-    status: to_confirm
-    default: true
-  - id: azure:de-DE-ConradNeural
-    provider: azure
-    display_name: Conrad
-    gender: male
-    age_range: adult
-    styles: [neutral, narrative]
-    sample: samples/voices/de-DE-conrad.mp3
-    validated_by: null
-    validated_on: null
-    status: to_confirm
-  - id: azure:de-DE-AmalaNeural
-    provider: azure
-    display_name: Amala
-    gender: female
-    age_range: adult
-    styles: [warm]
-    sample: samples/voices/de-DE-amala.mp3
-    validated_by: null
-    validated_on: null
-    status: to_confirm
-  - id: azure:de-DE-KillianNeural
-    provider: azure
-    display_name: Killian
-    gender: male
-    age_range: adult
-    styles: [energetic]
-    sample: samples/voices/de-DE-killian.mp3
-    validated_by: null
-    validated_on: null
-    status: to_confirm
+- id: azure:de-DE-KatjaNeural
+  provider: azure
+  display_name: Katja
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  sample: samples/voices/de-DE-katja.mp3
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+  default: true
+- id: azure:de-DE-ConradNeural
+  provider: azure
+  display_name: Conrad
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  - narrative
+  sample: samples/voices/de-DE-conrad.mp3
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: azure:de-DE-AmalaNeural
+  provider: azure
+  display_name: Amala
+  gender: female
+  age_range: adult
+  styles:
+  - warm
+  sample: samples/voices/de-DE-amala.mp3
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: azure:de-DE-KillianNeural
+  provider: azure
+  display_name: Killian
+  gender: male
+  age_range: adult
+  styles:
+  - energetic
+  sample: samples/voices/de-DE-killian.mp3
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: piper:de_DE-thorsten-high
+  provider: piper
+  display_name: Thorsten
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  quality: hd
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: piper:de_DE-kerstin-low
+  provider: piper
+  display_name: Kerstin
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  quality: standard
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: piper:de_DE-ramona-low
+  provider: piper
+  display_name: Ramona
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  quality: standard
+  validated_by: null
+  validated_on: null
+  status: to_confirm
 de-AT:
-  - id: azure:de-AT-IngridNeural
-    provider: azure
-    display_name: Ingrid
-    gender: female
-    age_range: adult
-    styles: [neutral]
-    sample: samples/voices/de-AT-ingrid.mp3
-    validated_by: null
-    validated_on: null
-    status: to_confirm
-    default: true
-  - id: azure:de-AT-JonasNeural
-    provider: azure
-    display_name: Jonas
-    gender: male
-    age_range: adult
-    styles: [neutral]
-    sample: samples/voices/de-AT-jonas.mp3
-    validated_by: null
-    validated_on: null
-    status: to_confirm
+- id: azure:de-AT-IngridNeural
+  provider: azure
+  display_name: Ingrid
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  sample: samples/voices/de-AT-ingrid.mp3
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+  default: true
+- id: azure:de-AT-JonasNeural
+  provider: azure
+  display_name: Jonas
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  sample: samples/voices/de-AT-jonas.mp3
+  validated_by: null
+  validated_on: null
+  status: to_confirm
 de-CH:
-  - id: azure:de-CH-LeniNeural
-    provider: azure
-    display_name: Leni
-    gender: female
-    age_range: adult
-    styles: [neutral]
-    sample: samples/voices/de-CH-leni.mp3
-    validated_by: null
-    validated_on: null
-    status: to_confirm
-    default: true
-  - id: azure:de-CH-JanNeural
-    provider: azure
-    display_name: Jan
-    gender: male
-    age_range: adult
-    styles: [neutral]
-    sample: samples/voices/de-CH-jan.mp3
-    validated_by: null
-    validated_on: null
-    status: to_confirm
+- id: azure:de-CH-LeniNeural
+  provider: azure
+  display_name: Leni
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  sample: samples/voices/de-CH-leni.mp3
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+  default: true
+- id: azure:de-CH-JanNeural
+  provider: azure
+  display_name: Jan
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  sample: samples/voices/de-CH-jan.mp3
+  validated_by: null
+  validated_on: null
+  status: to_confirm
 sv-SE:
-  - id: azure:sv-SE-SofieNeural
-    provider: azure
-    display_name: Sofie
-    gender: female
-    age_range: adult
-    styles: [neutral]
-    sample: samples/voices/sv-SE-sofie.mp3
-    validated_by: null
-    validated_on: null
-    status: to_confirm
-    default: true
-  - id: azure:sv-SE-MattiasNeural
-    provider: azure
-    display_name: Mattias
-    gender: male
-    age_range: adult
-    styles: [neutral]
-    sample: samples/voices/sv-SE-mattias.mp3
-    validated_by: null
-    validated_on: null
-    status: to_confirm
+- id: azure:sv-SE-SofieNeural
+  provider: azure
+  display_name: Sofie
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  sample: samples/voices/sv-SE-sofie.mp3
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+  default: true
+- id: azure:sv-SE-MattiasNeural
+  provider: azure
+  display_name: Mattias
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  sample: samples/voices/sv-SE-mattias.mp3
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: piper:sv_SE-lisa-medium
+  provider: piper
+  display_name: Lisa
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  quality: standard
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: piper:sv_SE-nst-medium
+  provider: piper
+  display_name: NST
+  gender: unknown
+  age_range: adult
+  styles:
+  - neutral
+  quality: standard
+  validated_by: null
+  validated_on: null
+  status: to_confirm
 es-ES:
-  - id: azure:es-ES-ElviraNeural
-    provider: azure
-    display_name: Elvira
-    gender: female
-    age_range: adult
-    styles: [neutral]
-    sample: samples/voices/es-ES-elvira.mp3
-    validated_by: null
-    validated_on: null
-    status: to_confirm
-    default: true
-  - id: azure:es-ES-AlvaroNeural
-    provider: azure
-    display_name: Alvaro
-    gender: male
-    age_range: adult
-    styles: [neutral, narrative]
-    sample: samples/voices/es-ES-alvaro.mp3
-    validated_by: null
-    validated_on: null
-    status: to_confirm
-  - id: azure:es-ES-AbrilNeural
-    provider: azure
-    display_name: Abril
-    gender: female
-    age_range: adult
-    styles: [warm]
-    sample: samples/voices/es-ES-abril.mp3
-    validated_by: null
-    validated_on: null
-    status: to_confirm
-  - id: azure:es-ES-ArnauNeural
-    provider: azure
-    display_name: Arnau
-    gender: male
-    age_range: adult
-    styles: [energetic]
-    sample: samples/voices/es-ES-arnau.mp3
-    validated_by: null
-    validated_on: null
-    status: to_confirm
+- id: azure:es-ES-ElviraNeural
+  provider: azure
+  display_name: Elvira
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  sample: samples/voices/es-ES-elvira.mp3
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+  default: true
+- id: azure:es-ES-AlvaroNeural
+  provider: azure
+  display_name: Alvaro
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  - narrative
+  sample: samples/voices/es-ES-alvaro.mp3
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: azure:es-ES-AbrilNeural
+  provider: azure
+  display_name: Abril
+  gender: female
+  age_range: adult
+  styles:
+  - warm
+  sample: samples/voices/es-ES-abril.mp3
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: azure:es-ES-ArnauNeural
+  provider: azure
+  display_name: Arnau
+  gender: male
+  age_range: adult
+  styles:
+  - energetic
+  sample: samples/voices/es-ES-arnau.mp3
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: kokoro:ef_dora
+  provider: kokoro
+  display_name: Dora
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  quality: hd
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+  note: accent régional à confirmer
+- id: kokoro:em_alex
+  provider: kokoro
+  display_name: Alex
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  quality: hd
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+  note: accent régional à confirmer
+- id: piper:es_ES-davefx-medium
+  provider: piper
+  display_name: Davefx
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  quality: standard
+  validated_by: null
+  validated_on: null
+  status: to_confirm
 es-MX:
-  - id: azure:es-MX-DaliaNeural
-    provider: azure
-    display_name: Dalia
-    gender: female
-    age_range: adult
-    styles: [neutral]
-    sample: samples/voices/es-MX-dalia.mp3
-    validated_by: null
-    validated_on: null
-    status: to_confirm
-    default: true
-  - id: azure:es-MX-JorgeNeural
-    provider: azure
-    display_name: Jorge
-    gender: male
-    age_range: adult
-    styles: [neutral]
-    sample: samples/voices/es-MX-jorge.mp3
-    validated_by: null
-    validated_on: null
-    status: to_confirm
+- id: azure:es-MX-DaliaNeural
+  provider: azure
+  display_name: Dalia
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  sample: samples/voices/es-MX-dalia.mp3
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+  default: true
+- id: azure:es-MX-JorgeNeural
+  provider: azure
+  display_name: Jorge
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  sample: samples/voices/es-MX-jorge.mp3
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: piper:es_MX-claude-high
+  provider: piper
+  display_name: Claude
+  gender: unknown
+  age_range: adult
+  styles:
+  - neutral
+  quality: hd
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: piper:es_MX-ald-medium
+  provider: piper
+  display_name: Ald
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  quality: standard
+  validated_by: null
+  validated_on: null
+  status: to_confirm
 es-AR:
-  - id: azure:es-AR-ElenaNeural
-    provider: azure
-    display_name: Elena
-    gender: female
-    age_range: adult
-    styles: [neutral]
-    sample: samples/voices/es-AR-elena.mp3
-    validated_by: null
-    validated_on: null
-    status: to_confirm
-    default: true
-  - id: azure:es-AR-TomasNeural
-    provider: azure
-    display_name: Tomas
-    gender: male
-    age_range: adult
-    styles: [neutral]
-    sample: samples/voices/es-AR-tomas.mp3
-    validated_by: null
-    validated_on: null
-    status: to_confirm
+- id: azure:es-AR-ElenaNeural
+  provider: azure
+  display_name: Elena
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  sample: samples/voices/es-AR-elena.mp3
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+  default: true
+- id: azure:es-AR-TomasNeural
+  provider: azure
+  display_name: Tomas
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  sample: samples/voices/es-AR-tomas.mp3
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: piper:es_AR-daniela-high
+  provider: piper
+  display_name: Daniela
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  quality: hd
+  validated_by: null
+  validated_on: null
+  status: to_confirm
 it-IT:
-  - id: azure:it-IT-ElsaNeural
-    provider: azure
-    display_name: Elsa
-    gender: female
-    age_range: adult
-    styles: [neutral]
-    sample: samples/voices/it-IT-elsa.mp3
-    validated_by: null
-    validated_on: null
-    status: to_confirm
-    default: true
-  - id: azure:it-IT-DiegoNeural
-    provider: azure
-    display_name: Diego
-    gender: male
-    age_range: adult
-    styles: [neutral]
-    sample: samples/voices/it-IT-diego.mp3
-    validated_by: null
-    validated_on: null
-    status: to_confirm
+- id: azure:it-IT-ElsaNeural
+  provider: azure
+  display_name: Elsa
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  sample: samples/voices/it-IT-elsa.mp3
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+  default: true
+- id: azure:it-IT-DiegoNeural
+  provider: azure
+  display_name: Diego
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  sample: samples/voices/it-IT-diego.mp3
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: kokoro:if_sara
+  provider: kokoro
+  display_name: Sara
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  quality: hd
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: kokoro:im_nicola
+  provider: kokoro
+  display_name: Nicola
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  quality: hd
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: piper:it_IT-paola-medium
+  provider: piper
+  display_name: Paola
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  quality: standard
+  validated_by: null
+  validated_on: null
+  status: to_confirm
 pl-PL:
-  - id: azure:pl-PL-ZofiaNeural
-    provider: azure
-    display_name: Zofia
-    gender: female
-    age_range: adult
-    styles: [neutral]
-    sample: samples/voices/pl-PL-zofia.mp3
-    validated_by: null
-    validated_on: null
-    status: to_confirm
-    default: true
-  - id: azure:pl-PL-MarekNeural
-    provider: azure
-    display_name: Marek
-    gender: male
-    age_range: adult
-    styles: [neutral]
-    sample: samples/voices/pl-PL-marek.mp3
-    validated_by: null
-    validated_on: null
-    status: to_confirm
+- id: azure:pl-PL-ZofiaNeural
+  provider: azure
+  display_name: Zofia
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  sample: samples/voices/pl-PL-zofia.mp3
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+  default: true
+- id: azure:pl-PL-MarekNeural
+  provider: azure
+  display_name: Marek
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  sample: samples/voices/pl-PL-marek.mp3
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: piper:pl_PL-gosia-medium
+  provider: piper
+  display_name: Gosia
+  gender: female
+  age_range: adult
+  styles:
+  - neutral
+  quality: standard
+  validated_by: null
+  validated_on: null
+  status: to_confirm
+- id: piper:pl_PL-darkman-medium
+  provider: piper
+  display_name: Darkman
+  gender: male
+  age_range: adult
+  styles:
+  - neutral
+  quality: standard
+  validated_by: null
+  validated_on: null
+  status: to_confirm

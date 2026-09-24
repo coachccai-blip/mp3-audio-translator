@@ -19,10 +19,15 @@ export function VoiceCard({ voice, selected, recommended, onSelect }: {
         </button>
         <PlayButton id={`sample-${voice.id}`} label={voice.display_name} size={30} variant="outline" load={() => api.voiceSample(voice)} />
       </div>
+      {voice.note && <p className="text-[11px] text-muted">{voice.note}</p>}
       <div className="flex flex-wrap gap-1">
         {voice.styles.map((s) => <span key={s} className="rounded-sm bg-surface-2 px-1.5 py-0.5 text-[11px] text-muted">{t(`style.${s}` as "style.neutral") || s}</span>)}
       </div>
       <div className="flex flex-wrap items-center gap-1">
+        {voice.quality === "hd" && <span className="rounded-sm border border-primary/40 px-1.5 py-0.5 text-[11px] font-semibold text-primary">HD</span>}
+        <span className="rounded-sm bg-surface-2 px-1.5 py-0.5 text-[11px] text-muted" title={voice.provider}>
+          {voice.free ? t("voice.free") : voice.provider === "azure" ? "Azure" : voice.provider === "elevenlabs" ? "ElevenLabs" : voice.provider}
+        </span>
         {recommended && <span className="rounded-sm bg-primary/10 px-1.5 py-0.5 text-[11px] font-medium text-primary">{t("speakers.recommended")}</span>}
         {!voice.validated && <span className="rounded-sm bg-accent/15 px-1.5 py-0.5 text-[11px] text-text" title={voice.status}>{t("voice.toConfirm")}</span>}
       </div>

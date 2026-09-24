@@ -1,8 +1,9 @@
 """Test de bout en bout avec les VRAIS modèles locaux (Demucs, Whisper, pyannote si HF_TOKEN).
 
-La traduction et la synthèse vocale sont simulées (pas de clés API nécessaires), sauf avec --real-apis.
+Par défaut, tout est réel et gratuit : traduction locale (Ollama), voix locales (Kokoro, Piper).
+Avec --mock, traduction et voix sont simulées.
 
-    python scripts/smoke_test.py parole.wav [--to fr-FR] [--real-apis]
+    python scripts/smoke_test.py parole.wav [--to fr-FR --to de-DE] [--mock]
 """
 from __future__ import annotations
 
@@ -22,8 +23,8 @@ def main() -> int:
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     ap = argparse.ArgumentParser()
     ap.add_argument("audio")
-    ap.add_argument("--to", default="fr-FR")
-    ap.add_argument("--real-apis", action="store_true", help="utiliser Claude et le TTS réels (clés requises)")
+    ap.add_argument("--to", action="append", help="locale cible (répétable), défaut fr-FR")
+    ap.add_argument("--mock", action="store_true", help="simuler traduction et voix")
     args = ap.parse_args()
 
     import os
@@ -47,7 +48,8 @@ def main() -> int:
     if not (whisper_available() and demucs_available()):
         print("ÉCHEC : Whisper et Demucs doivent être installés.")
         return 1
-    if not args.real_apis:
+    targets = args.to or ["fr-FR"]
+    if args.mock:
         from app.pipeline.translate import EchoTranslator
         from app.pipeline.tts.mock import MockTTS
         base = E.default_engines()
@@ -56,7 +58,7 @@ def main() -> int:
                                 lambda: tr, lambda name: tts))
 
     src = Path(args.audio).resolve()
-    project = Project(name=src.stem, targets=[args.to])
+    project = Project(name=src.stem, targets=targets)
     f = AudioFile(project_id=project.id, name=src.name, path="")
     dest = runner.project_dir(project.id) / "files" / f.id / f"original{src.suffix.lower()}"
     dest.parent.mkdir(parents=True, exist_ok=True)
@@ -80,18 +82,34 @@ def main() -> int:
         print("ÉCHEC : aucune parole transcrite.")
         return 1
 
-    rep = runner.dub_file(ctx, f, project, args.to)
+    from app.models import Segment, Speaker, select
+
+    with session() as db:
+        for sp in db.exec(select(Speaker).where(Speaker.audio_file_id == f.id)).all():
+            print(f"Locuteur {sp.key} ({sp.gender}) → voix {sp.voices}")
+    ok = True
+    for loc in targets:
+        t1 = time.time()
+        rep = runner.dub_file(ctx, f, project, loc)
+        with session() as db:
+            segs = db.exec(select(Segment).where(Segment.audio_file_id == f.id, Segment.locale == loc)).all()
+        for sg in segs:
+            print(f"  [{loc}] {sg.status:<8} {sg.voice_id} : {sg.effective_text} {('— ' + sg.error) if sg.error else ''}")
+        print(f"  [{loc}] {rep['counts']} en {time.time() - t1:.0f} s")
+        if rep["counts"].get("error"):
+            ok = False
     with session() as db:
         db.get(AudioFile, f.id).status = "done"
         db.commit()
     out = export_project(project.id, "original", {"subtitles": True, "report": True})
-    main_out = Path(out["summary"][0]["path"])
     src_data, sr = A.load(src)
-    out_data, sr2 = A.load(main_out)
-    delta = abs(len(out_data) / sr2 - len(src_data) / sr) * 1000
-    print(f"Sortie : {main_out.name} — écart de durée {delta:.1f} ms — {rep['counts']}")
-    ok = delta <= 50 and sr2 == sr and out_data.shape[1] == src_data.shape[1]
-    print("SUCCÈS" if ok else "ÉCHEC : durée, fréquence ou canaux différents")
+    for item in out["summary"]:
+        out_data, sr2 = A.load(Path(item["path"]))
+        delta = abs(len(out_data) / sr2 - len(src_data) / sr) * 1000
+        good = delta <= 50 and sr2 == sr and out_data.shape[1] == src_data.shape[1]
+        ok = ok and good
+        print(f"Sortie {Path(item['path']).name} : écart {delta:.1f} ms, {sr2} Hz, {out_data.shape[1]} canal(aux) {'OK' if good else 'KO'}")
+    print("SUCCÈS" if ok else "ÉCHEC")
     return 0 if ok else 1
 
 

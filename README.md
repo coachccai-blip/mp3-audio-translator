@@ -11,6 +11,19 @@ Langues : français, anglais, chinois (mandarin), allemand, suédois, espagnol, 
 
 ---
 
+## Gratuit, sans aucune clé
+
+Par défaut, tout tourne sur votre ordinateur, gratuitement et sans limite :
+
+| Étape | Moteur gratuit (local) | Option premium (clé) |
+|---|---|---|
+| Séparation voix/fond, transcription | Demucs, Whisper large-v3 | — |
+| Traduction isochrone | modèle open source via **Ollama** (`gemma3:4b` par défaut, `gemma3:12b` si carte graphique) | Claude (`ANTHROPIC_API_KEY`) |
+| Voix natives | **Kokoro** (HD 24 kHz) et **Piper** | Azure Neural TTS (400+ voix, gratuit jusqu'à 500 000 caractères/mois) |
+
+Voix gratuites disponibles : anglais US (30), anglais UK (12), chinois (9), français (4), espagnol d'Espagne (3), du Mexique (2), d'Argentine (1), italien (3), allemand (3), polonais (2), suédois (2). Les variantes sans voix native gratuite (fr-CA, fr-BE, fr-CH, en-AU, en-IE, de-AT, de-CH, zh-TW) sont masquées en mode gratuit, jamais doublées avec un accent étranger ; elles apparaissent si vous ajoutez une clé Azure.
+Qualité : les voix gratuites sont moins expressives que les voix Azure, et la traduction locale moins fine que Claude, surtout sur les langues moins courantes. À écouter avant de publier.
+
 ## Deux façons de l'utiliser
 
 | | Serveur local (vrai doublage) | GitHub Pages (démo) |
@@ -30,8 +43,8 @@ GitHub Pages n'héberge que des pages statiques : il ne peut pas faire tourner W
 
 1. Téléchargez **[Installer-Doublr.bat](https://coachccai-blip.github.io/mp3-audio-translator/Installer-Doublr.bat)** (bouton « Installer sur Windows » sur le site).
 2. Double-cliquez dessus. Si Windows affiche « Windows a protégé votre ordinateur », cliquez sur **Informations complémentaires → Exécuter quand même**.
-3. Laissez faire (15 à 40 min, ~6 Go) : Python, Node.js, PyTorch, Whisper large-v3, Demucs et pyannote sont installés dans `%LOCALAPPDATA%\Doublr`, **sans droits administrateur**. Une carte NVIDIA est détectée et utilisée automatiquement.
-4. Collez vos clés API quand elles sont demandées (ou plus tard dans Réglages).
+3. Laissez faire (20 à 60 min, ~12 Go) : Python, Node.js, PyTorch, Whisper large-v3, Demucs, pyannote, les voix Kokoro et Piper, Ollama et son modèle de traduction sont installés dans `%LOCALAPPDATA%\Doublr`, **sans droits administrateur**. Une carte NVIDIA est détectée et utilisée automatiquement.
+4. Les clés API sont **facultatives** : appuyez sur Entrée pour les passer (Doublr fonctionne alors gratuitement).
 5. Double-cliquez sur le raccourci **Doublr** du Bureau : le serveur démarre et Doublr s'ouvre dans votre navigateur (`http://localhost:8000`). Laissez la fenêtre noire ouverte pendant l'utilisation.
 
 Les fichiers doublés vont dans `Documents\Doublr`. Pour mettre à jour : menu Démarrer → **Mettre à jour Doublr** (vos clés et projets sont conservés).

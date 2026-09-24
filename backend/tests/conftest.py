@@ -29,6 +29,7 @@ def app_env(tmp_path, monkeypatch, samples_dir):
     monkeypatch.setenv("DOUBLR_OUTPUT_DIR", str(tmp_path / "exports"))
     monkeypatch.setenv("DOUBLR_TTS_PROVIDER", "azure")
     monkeypatch.setenv("DOUBLR_REQUIRE_VALIDATED_VOICES", "false")
+    monkeypatch.setenv("AZURE_SPEECH_KEY", "test")  # voix Azure proposées ; la synthèse est simulée
     from app import config
     config.reload_settings()
     from app import models

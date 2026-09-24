@@ -91,9 +91,37 @@ export function SettingsPage({ theme, setTheme }: { theme: ThemePref; setTheme: 
       </section>
 
       <section className="card space-y-4 p-5">
-        <label className="block"><span className="label">{t("settings.provider")}</span>
-          <select className="input" disabled={!local} value={settings?.tts_provider || "azure"} onChange={(e) => save({ values: { DOUBLR_TTS_PROVIDER: e.target.value } })}>
-            <option value="azure">Azure Neural TTS</option><option value="elevenlabs">ElevenLabs</option>
+        <label className="block"><span className="label">{t("settings.translation")}</span>
+          <select className="input" disabled={!local} value={settings?.translator || "auto"} onChange={(e) => save({ values: { DOUBLR_TRANSLATOR: e.target.value } })}>
+            <option value="auto">{t("translator.auto")}</option>
+            <option value="local">{t("translator.local")}</option>
+            <option value="claude">{t("translator.claude")}</option>
+          </select>
+        </label>
+        {settings?.translator_engine === "local" && (
+          <div>
+            <label className="block"><span className="label">{t("settings.localModel")}</span>
+              <select className="input" disabled={!local} value={settings?.local_llm || "gemma3:4b"} onChange={(e) => save({ values: { DOUBLR_LOCAL_LLM: e.target.value } })}>
+                <option value="gemma3:4b">Gemma 3 4B — {t("model.light")}</option>
+                <option value="gemma3:12b">Gemma 3 12B — {t("model.better")}</option>
+                <option value="qwen2.5:7b">Qwen 2.5 7B</option>
+              </select>
+            </label>
+            {settings.ollama && (
+              <p className={`mt-1 inline-flex items-center gap-1 text-xs ${settings.ollama.model_ready ? "text-success" : "text-accent"}`}>
+                <Icon name={settings.ollama.model_ready ? "check" : "alert"} size={12} />
+                {settings.ollama.model_ready ? t("settings.ollamaOk") : t("settings.ollamaMissing", { model: settings.ollama.model })}
+              </p>
+            )}
+          </div>
+        )}
+        <label className="block"><span className="label">{t("settings.voicePref")}</span>
+          <select className="input" disabled={!local} value={settings?.tts_provider || "auto"} onChange={(e) => save({ values: { DOUBLR_TTS_PROVIDER: e.target.value } })}>
+            <option value="auto">{t("voicePref.auto")}</option>
+            <option value="kokoro">Kokoro — {t("voice.free")} HD</option>
+            <option value="piper">Piper — {t("voice.free")}</option>
+            <option value="azure">Azure Neural TTS</option>
+            <option value="elevenlabs">ElevenLabs</option>
           </select>
         </label>
         <label className="block"><span className="label">{t("settings.whisper")}</span>
@@ -160,7 +188,7 @@ export function SettingsPage({ theme, setTheme }: { theme: ThemePref; setTheme: 
                 {vs.map((v) => (
                   <li key={v.id} className={`flex items-center gap-2 text-sm ${v.disabled ? "opacity-50" : ""}`}>
                     <PlayButton id={`sample-${v.id}`} label={v.display_name} size={24} variant="outline" load={() => api.voiceSample(v)} />
-                    <span className="flex-1">{v.display_name} <span className="text-xs text-muted">· {t(`gender.${v.gender as "male"}`)}{v.validated ? "" : ` · ${t("voice.toConfirm")}`}</span></span>
+                    <span className="flex-1">{v.display_name} <span className="text-xs text-muted">· {t(`gender.${v.gender as "male"}`)} · {v.free ? t("voice.free") : v.provider}{v.quality === "hd" ? " · HD" : ""}{v.validated ? "" : ` · ${t("voice.toConfirm")}`}</span></span>
                     {local && (
                       <button className="text-xs text-primary underline" onClick={async () => {
                         const nv = await api.toggleVoice(v.id, !v.disabled);

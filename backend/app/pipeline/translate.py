@@ -228,3 +228,85 @@ def dumps_request(req: TranslationRequest) -> str:
                                        "register", "prev", "next", "glossary")}
     d["previous"] = req.previous.__dict__ if req.previous else None
     return json.dumps(d, sort_keys=True, ensure_ascii=False)
+
+
+# --- Implémentation locale gratuite (Ollama) ------------------------------------
+
+class OllamaTranslator:
+    """Traduction gratuite par un modèle de langage open source exécuté localement par Ollama.
+
+    Mêmes consignes que pour Claude (§7.3) ; la sortie JSON est contrainte par un schéma.
+    """
+
+    def __init__(self, model: str | None = None, url: str | None = None, timeout: float = 600.0):
+        s = get_settings()
+        self.model = model or s.local_llm
+        self.url = (url or s.ollama_url).rstrip("/")
+        self.timeout = timeout
+        self.input_tokens = 0
+        self.output_tokens = 0
+
+    def _chat(self, system: str, user: str, schema: type[BaseModel]):
+        import httpx
+
+        body = {
+            "model": self.model, "stream": False, "format": schema.model_json_schema(),
+            "options": {"temperature": 0.2},
+            "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
+        }
+        try:
+            r = httpx.post(f"{self.url}/api/chat", json=body, timeout=self.timeout)
+        except httpx.HTTPError as exc:
+            raise TranslationError(
+                f"Traducteur local (Ollama) injoignable sur {self.url} : lancez Doublr avec son raccourci "
+                f"ou démarrez « ollama serve ». ({exc})") from exc
+        if r.status_code == 404:
+            raise TranslationError(f"Modèle local « {self.model} » absent : exécutez « ollama pull {self.model} ».")
+        if r.status_code != 200:
+            raise TranslationError(f"Ollama HTTP {r.status_code} : {r.text[:200]}")
+        data = r.json()
+        self.input_tokens += int(data.get("prompt_eval_count") or 0)
+        self.output_tokens += int(data.get("eval_count") or 0)
+        try:
+            return schema.model_validate_json(data["message"]["content"])
+        except Exception as exc:
+            raise TranslationError(f"Réponse du modèle local invalide : {str(exc)[:200]}") from exc
+
+    def translate(self, req: TranslationRequest) -> TranslationResult:
+        out = self._chat(build_system_prompt(req), build_user_prompt(req), _TranslationOut)
+        text = out.translation.strip().strip('"«»').strip()
+        if not text:
+            raise TranslationError("Traduction vide.")
+        return TranslationResult(text=text, estimated_units=count_units(text, req.target_locale))
+
+    def analyze_document(self, text: str, source_lang: str, target_locale: str) -> DocumentAnalysis:
+        target = LANG_NAMES.get(target_locale.split("-")[0], target_locale)
+        system = (
+            "You prepare a transcript for dubbing. Give its speech_register (one of: formal, conversational, "
+            f"advertising, educational) and up to 20 recurring proper nouns or key terms with their {target} "
+            "translation (empty target = keep untranslated). Respond with JSON only."
+        )
+        out = self._chat(system, text[:12000], _DocOut)
+        register = out.speech_register if out.speech_register in REGISTERS else "conversational"
+        return DocumentAnalysis(register=register, terms=[(t.source, t.target) for t in out.terms])
+
+
+def make_translator() -> Translator:
+    """Traducteur selon les réglages : Claude si choisi (ou clé présente en mode auto), sinon local gratuit."""
+    if get_settings().translator_engine == "claude":
+        return ClaudeTranslator()
+    return OllamaTranslator()
+
+
+def ollama_status() -> dict:
+    """État du traducteur local : serveur Ollama joignable et modèle téléchargé."""
+    import httpx
+
+    s = get_settings()
+    try:
+        r = httpx.get(f"{s.ollama_url.rstrip('/')}/api/tags", timeout=2.0)
+        names = [m.get("name", "") for m in r.json().get("models", [])] if r.status_code == 200 else []
+    except Exception:
+        return {"running": False, "model": s.local_llm, "model_ready": False}
+    want = s.local_llm if ":" in s.local_llm else f"{s.local_llm}:latest"
+    return {"running": True, "model": s.local_llm, "model_ready": want in names}

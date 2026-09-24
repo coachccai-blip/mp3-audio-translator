@@ -80,6 +80,20 @@ const fr = {
   "settings.capabilities": "Modèles locaux installés", "settings.sound": "Son de confirmation en fin de traitement",
   "settings.saved": "Réglages enregistrés", "settings.newKey": "Nouvelle valeur",
   "error.generic": "Une erreur est survenue.", "error.noVoice": "Aucune voix native validée pour {locale}",
+  "banner.localLlm": "Le traducteur gratuit (Ollama) n'est pas prêt : lancez Doublr avec son raccourci ou relancez l'installateur.",
+  "estimate.free": "Gratuit",
+  "voice.free": "Gratuite",
+  "settings.translation": "Traduction",
+  "translator.auto": "Automatique (Claude si une clé est renseignée, sinon gratuite)",
+  "translator.local": "Gratuite, sur cet ordinateur (Ollama)",
+  "translator.claude": "Claude (clé Anthropic, payant)",
+  "settings.localModel": "Modèle de traduction local",
+  "model.light": "léger",
+  "model.better": "meilleur, carte graphique conseillée",
+  "settings.ollamaOk": "Traducteur local prêt",
+  "settings.ollamaMissing": "Modèle {model} absent ou Ollama arrêté",
+  "settings.voicePref": "Voix proposées par défaut",
+  "voicePref.auto": "Automatique (meilleure voix disponible)",
 } as const;
 
 export default fr;

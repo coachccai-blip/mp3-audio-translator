@@ -53,8 +53,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const missingKeys = useMemo(() => {
     if (!settings || api.mode === "demo") return [];
-    const need = ["ANTHROPIC_API_KEY", settings.tts_provider === "elevenlabs" ? "ELEVENLABS_API_KEY" : "AZURE_SPEECH_KEY"];
-    return need.filter((k) => !settings.keys[k]);
+    return settings.missing ?? [];
   }, [settings, api.mode]);
 
   const langName = useCallback((code: string | null | undefined) => {

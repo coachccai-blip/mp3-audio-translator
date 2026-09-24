@@ -7,6 +7,7 @@ export interface Language {
 export interface Voice {
   id: string; provider: string; locale: Locale; display_name: string; gender: string; age_range: string;
   styles: string[]; validated: boolean; status: string; default: boolean; disabled: boolean;
+  quality?: "hd" | "standard"; free?: boolean; note?: string | null;
 }
 export interface AudioFileT {
   id: string; project_id: string; name: string; duration_ms: number; format: string; sample_rate: number;
@@ -54,7 +55,9 @@ export interface Estimate { total_seconds: number; processing_seconds: number; c
 export interface SettingsT {
   keys: Record<string, boolean>; tts_provider: string; whisper_model: string; device: string; azure_region: string;
   claude_model: string; output_dir: string; data_dir: string; cache_bytes: number; require_validated_voices: boolean;
-  capabilities: { whisper: boolean; demucs: boolean; pyannote: boolean };
+  capabilities: { whisper: boolean; demucs: boolean; pyannote: boolean; kokoro?: boolean; piper?: boolean };
+  translator?: "auto" | "local" | "claude"; translator_engine?: "local" | "claude"; local_llm?: string;
+  ollama?: { running: boolean; model: string; model_ready: boolean }; missing?: string[];
 }
 export interface ExportBody {
   format: string; voice_only: boolean; background_only: boolean; subtitles: boolean; report: boolean;

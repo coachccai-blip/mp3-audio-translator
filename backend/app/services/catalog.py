@@ -33,6 +33,14 @@ class Voice:
     status: str = "to_confirm"
     default: bool = False
     disabled: bool = False
+    quality: str = "hd"          # hd | standard
+    note: str | None = None
+
+    @property
+    def free(self) -> bool:
+        from ..pipeline.tts import LOCAL_PROVIDERS
+
+        return self.provider in LOCAL_PROVIDERS
 
     @property
     def validated(self) -> bool:
@@ -43,6 +51,7 @@ class Voice:
             "id": self.id, "provider": self.provider, "locale": self.locale, "display_name": self.display_name,
             "gender": self.gender, "age_range": self.age_range, "styles": self.styles,
             "validated": self.validated, "status": self.status, "default": self.default, "disabled": self.disabled,
+            "quality": self.quality, "free": self.free, "note": self.note,
         }
 
 
@@ -66,7 +75,7 @@ class Catalog:
                     sample=e.get("sample"), validated_by=e.get("validated_by"),
                     validated_on=str(e["validated_on"]) if e.get("validated_on") else None,
                     status=e.get("status", "to_confirm"), default=bool(e.get("default")),
-                    disabled=e["id"] in disabled,
+                    disabled=e["id"] in disabled, quality=e.get("quality", "hd"), note=e.get("note"),
                 )
                 self.voices.setdefault(locale, []).append(v)
 
@@ -86,10 +95,19 @@ class Catalog:
 
     # --- Voix --------------------------------------------------------------
     def usable_voices(self, locale: str, require_validated: bool | None = None) -> list[Voice]:
+        """Voix proposables : non désactivées, validées si exigé, et dont le moteur est utilisable ici."""
+        from ..pipeline.tts import provider_available
+
         if require_validated is None:
             require_validated = get_settings().require_validated_voices
-        return [v for v in self.voices.get(locale, [])
-                if not v.disabled and (v.validated or not require_validated)]
+        ok = {}
+        out = []
+        for v in self.voices.get(locale, []):
+            if v.provider not in ok:
+                ok[v.provider] = provider_available(v.provider)
+            if ok[v.provider] and not v.disabled and (v.validated or not require_validated):
+                out.append(v)
+        return out
 
     def available_locales(self) -> list[str]:
         """Une variante n'est proposée que si au moins une voix native utilisable existe (§3)."""
@@ -109,12 +127,16 @@ class Catalog:
         raise KeyError(voice_id)
 
     def default_voice(self, locale: str, gender: str | None = None) -> Voice:
+        """Meilleure voix disponible : fournisseur préféré, puis HD, puis voix marquée par défaut, puis genre."""
         voices = self.voices_for(locale)
-        if gender in ("male", "female"):
-            same = [v for v in voices if v.gender == gender]
-            if same:
-                return next((v for v in same if v.default), same[0])
-        return next((v for v in voices if v.default), voices[0])
+        preferred = get_settings().tts_provider
+        rank = {"azure": 3, "elevenlabs": 3, "kokoro": 2, "piper": 1}
+
+        def score(v: Voice):
+            return (v.provider == preferred, rank.get(v.provider, 0), v.quality == "hd", v.default)
+
+        pool = [v for v in voices if v.gender == gender] if gender in ("male", "female") else []
+        return max(pool or voices, key=score)
 
     def languages_payload(self) -> list[dict]:
         """Langues pour l'UI, variantes sans voix native masquées (pas grisées)."""

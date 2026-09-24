@@ -29,7 +29,7 @@ export function SpeakersPage({ project, reload }: { project: Project; reload: ()
 
   const launch = async () => {
     if (missingKeys.length) {
-      toast({ tone: "danger", text: t("banner.missingKeys", { keys: missingKeys.join(", ") }), action: { label: t("banner.goSettings"), run: () => go("/settings") } });
+      toast({ tone: "danger", text: (missingKeys.includes("LOCAL_LLM") ? t("banner.localLlm") : t("banner.missingKeys", { keys: missingKeys.join(", ") })), action: { label: t("banner.goSettings"), run: () => go("/settings") } });
       return;
     }
     try { await api.run(project.id); go(`/p/${project.id}/processing`); } catch (e) { toast({ tone: "danger", text: errMsg(e) }); }
