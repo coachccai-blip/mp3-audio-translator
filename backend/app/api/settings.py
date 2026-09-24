@@ -13,12 +13,15 @@ from ..config import SECRET_KEYS, get_settings, write_env_values
 from ..pipeline.diarize import pyannote_available
 from ..pipeline.separate import demucs_available
 from ..pipeline.transcribe import whisper_available
+from ..pipeline.translate import ollama_status
+from ..pipeline.tts import provider_available
 from ..services import engines
+from .projects import missing_requirements
 from ..services.catalog import get_catalog
 
 router = APIRouter(prefix="/api")
 
-EDITABLE = {"DOUBLR_TTS_PROVIDER", "DOUBLR_WHISPER_MODEL", "DOUBLR_DEVICE", "AZURE_SPEECH_REGION",
+EDITABLE = {"DOUBLR_TTS_PROVIDER", "DOUBLR_TRANSLATOR", "DOUBLR_LOCAL_LLM", "DOUBLR_WHISPER_MODEL", "DOUBLR_DEVICE", "AZURE_SPEECH_REGION",
             "DOUBLR_OUTPUT_DIR", "DOUBLR_CLAUDE_MODEL", "DOUBLR_TTS_CONCURRENCY"}
 
 
@@ -40,7 +43,10 @@ def get_settings_route():
         "azure_region": s.azure_region, "claude_model": s.claude_model, "output_dir": str(s.output_dir),
         "data_dir": str(s.data_dir), "cache_bytes": _dir_size(s.data_dir / "projects"),
         "require_validated_voices": s.require_validated_voices,
-        "capabilities": {"whisper": whisper_available(), "demucs": demucs_available(), "pyannote": pyannote_available()},
+        "capabilities": {"whisper": whisper_available(), "demucs": demucs_available(), "pyannote": pyannote_available(),
+                         "kokoro": provider_available("kokoro"), "piper": provider_available("piper")},
+        "translator": s.translator, "translator_engine": s.translator_engine, "local_llm": s.local_llm,
+        "ollama": ollama_status(), "missing": missing_requirements(),
     }
 
 

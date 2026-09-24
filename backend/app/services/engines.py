@@ -9,7 +9,7 @@ from ..config import get_settings
 from ..pipeline import diarize as diarize_mod
 from ..pipeline import separate as separate_mod
 from ..pipeline import transcribe as transcribe_mod
-from ..pipeline.translate import ClaudeTranslator, Translator
+from ..pipeline.translate import Translator, make_translator
 from ..pipeline.tts import TTSProvider, get_provider
 
 
@@ -40,7 +40,7 @@ def default_engines() -> Engines:
             path, model or s.whisper_model, s.device, language, on_unit),
         diarize=diarize_mod.diarize,
         detect_language=lambda path: transcribe_mod.detect_language(path, s.whisper_model, s.device),
-        translator=lambda: ClaudeTranslator(),
+        translator=make_translator,
         tts=_tts,
     )
 

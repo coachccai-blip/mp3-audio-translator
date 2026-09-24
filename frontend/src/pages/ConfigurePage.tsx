@@ -37,7 +37,7 @@ export function ConfigurePage({ project, onChange }: { project: Project; onChang
     if (!project.targets.length) { toast({ tone: "warning", text: t("configure.pickTarget") }); return; }
     if (noisy && !window.confirm(t("configure.noisyConfirm"))) return;
     if (missingKeys.length && direct) {
-      toast({ tone: "danger", text: t("banner.missingKeys", { keys: missingKeys.join(", ") }), action: { label: t("banner.goSettings"), run: () => go("/settings") } });
+      toast({ tone: "danger", text: (missingKeys.includes("LOCAL_LLM") ? t("banner.localLlm") : t("banner.missingKeys", { keys: missingKeys.join(", ") })), action: { label: t("banner.goSettings"), run: () => go("/settings") } });
       return;
     }
     try {
@@ -127,7 +127,7 @@ export function ConfigurePage({ project, onChange }: { project: Project; onChang
 
       {missingKeys.length > 0 && (
         <Banner tone="warning" action={<button className="btn-secondary btn-sm" onClick={() => go("/settings")}>{t("banner.goSettings")}</button>}>
-          {t("banner.missingKeys", { keys: missingKeys.join(", ") })}
+          {(missingKeys.includes("LOCAL_LLM") ? t("banner.localLlm") : t("banner.missingKeys", { keys: missingKeys.join(", ") }))}
         </Banner>
       )}
 
@@ -136,7 +136,7 @@ export function ConfigurePage({ project, onChange }: { project: Project; onChang
           <dl className="flex flex-1 flex-wrap gap-x-6 gap-y-1 text-sm">
             <div><dt className="text-xs text-muted">{t("estimate.duration")}</dt><dd className="font-mono">{estimate ? fmtDuration(estimate.total_seconds * 1000) : "—"}</dd></div>
             <div><dt className="text-xs text-muted">{t("estimate.time")}</dt><dd className="font-mono">{estimate ? `≈ ${fmtDuration(estimate.processing_seconds * 1000)}` : "—"}</dd></div>
-            <div><dt className="text-xs text-muted">{t("estimate.cost")}</dt><dd className="font-mono">{estimate ? `≈ ${estimate.cost_usd.toFixed(2)} $` : "—"}</dd></div>
+            <div><dt className="text-xs text-muted">{t("estimate.cost")}</dt><dd className="font-mono">{estimate ? (estimate.cost_usd === 0 ? t("estimate.free") : `≈ ${estimate.cost_usd.toFixed(2)} $`) : "—"}</dd></div>
           </dl>
           <button className="btn-secondary" onClick={() => launch(false)}>{t("configure.configureVoices")}</button>
           <button className="btn-primary" onClick={() => launch(true)}>{t("configure.dubNow")}</button>

@@ -22,7 +22,7 @@ def read_env_file(path: Path = ENV_FILE) -> dict[str, str]:
     values: dict[str, str] = {}
     if not path.exists():
         return values
-    for line in path.read_text(encoding="utf-8").splitlines():
+    for line in path.read_text(encoding="utf-8-sig").splitlines():
         line = line.strip()
         if not line or line.startswith("#") or "=" not in line:
             continue
@@ -68,7 +68,13 @@ def _bool(name: str, default: bool) -> bool:
 class Settings:
     data_dir: Path = field(default_factory=lambda: Path(_get("DOUBLR_DATA_DIR", str(ROOT_DIR / "data"))))
     output_dir: Path = field(default_factory=lambda: Path(_get("DOUBLR_OUTPUT_DIR", str(ROOT_DIR / "exports"))))
-    tts_provider: str = field(default_factory=lambda: _get("DOUBLR_TTS_PROVIDER", "azure"))
+    # Voix : fournisseur privilégié pour les voix par défaut (auto = meilleure voix disponible).
+    tts_provider: str = field(default_factory=lambda: _get("DOUBLR_TTS_PROVIDER", "auto"))
+    # Traduction : local (gratuit, Ollama), claude (clé Anthropic) ou auto (Claude si une clé existe).
+    translator: str = field(default_factory=lambda: _get("DOUBLR_TRANSLATOR", "auto"))
+    local_llm: str = field(default_factory=lambda: _get("DOUBLR_LOCAL_LLM", "gemma3:4b"))
+    ollama_url: str = field(default_factory=lambda: _get("OLLAMA_HOST", "http://127.0.0.1:11434"))
+    models_dir: Path = field(default_factory=lambda: Path(_get("DOUBLR_MODELS_DIR", str(ROOT_DIR / "data" / "models"))))
     azure_region: str = field(default_factory=lambda: _get("AZURE_SPEECH_REGION", "westeurope"))
     claude_model: str = field(default_factory=lambda: _get("DOUBLR_CLAUDE_MODEL", "claude-opus-5"))
     whisper_model: str = field(default_factory=lambda: _get("DOUBLR_WHISPER_MODEL", "large-v3"))
@@ -89,6 +95,12 @@ class Settings:
 
     def has_key(self, name: str) -> bool:
         return bool(_get(name))
+
+    @property
+    def translator_engine(self) -> str:
+        if self.translator in ("local", "claude"):
+            return self.translator
+        return "claude" if self.has_key("ANTHROPIC_API_KEY") else "local"
 
     @property
     def db_url(self) -> str:

@@ -46,10 +46,13 @@ def separate(src: Path, out_dir: Path, device: str = "auto") -> Separation:
     cmd = [sys.executable, "-m", "demucs", "-n", "htdemucs", "--two-stems", "vocals", "-o", str(out_dir / "demucs")]
     if device in ("cpu", "cuda", "mps"):
         cmd += ["-d", device]
-    proc = subprocess.run([*cmd, str(src)], capture_output=True)
+    wav_in = out_dir / "input.wav"
+    save(data, sr, wav_in)
+    proc = subprocess.run([*cmd, str(wav_in)], capture_output=True)
+    wav_in.unlink(missing_ok=True)
     if proc.returncode != 0:
         raise RuntimeError(f"Demucs a échoué : {proc.stderr.decode('utf-8', 'replace')[-400:]}")
-    stem_dir = next((out_dir / "demucs" / "htdemucs").glob("*"))
+    stem_dir = out_dir / "demucs" / "htdemucs" / "input"
     v, vsr = load(stem_dir / "vocals.wav", sample_rate=sr)
     b, _ = load(stem_dir / "no_vocals.wav", sample_rate=sr)
     save(v, sr, vocals)

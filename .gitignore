@@ -19,3 +19,4 @@ node_modules/
 frontend/dist/
 frontend/src/data/catalog.json
 *.tsbuildinfo
+frontend/public/Installer-Doublr.bat

@@ -23,14 +23,25 @@ def pyannote_available() -> bool:
 def _pipeline():
     from pyannote.audio import Pipeline
 
-    return Pipeline.from_pretrained("pyannote/speaker-diarization-3.1", use_auth_token=os.environ["HF_TOKEN"])
+    import torch
+
+    pipeline = Pipeline.from_pretrained("pyannote/speaker-diarization-3.1", use_auth_token=os.environ["HF_TOKEN"])
+    if torch.cuda.is_available():
+        pipeline.to(torch.device("cuda"))
+    return pipeline
 
 
 def diarize(path: Path) -> list[tuple[float, float, str]]:
     """Renvoie des tours de parole (début, fin, locuteur). Liste vide si indisponible."""
     if not pyannote_available():
         return []
-    annotation = _pipeline()(str(path))
+    import torch
+
+    from .audio import load
+
+    data, sr = load(path)
+    # Audio passé en mémoire : évite la dépendance de pyannote au décodage de fichiers (FFmpeg).
+    annotation = _pipeline()({"waveform": torch.from_numpy(data.T.copy()), "sample_rate": sr})
     return [(t.start, t.end, spk) for t, _, spk in annotation.itertracks(yield_label=True)]
 
 

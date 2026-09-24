@@ -6,9 +6,10 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from .api import projects, settings as settings_api, voices
-from .config import get_settings
+from .config import ROOT_DIR, get_settings
 from .models import get_engine
 from .services.jobs import manager
 
@@ -65,3 +66,9 @@ async def job_ws(ws: WebSocket, job_id: str):
             await ws.close()
         except RuntimeError:
             pass
+
+
+# Interface compilée (installateur Windows) : servie sur la même origine que l'API.
+_DIST = ROOT_DIR / "frontend" / "dist"
+if _DIST.is_dir():
+    app.mount("/", StaticFiles(directory=_DIST, html=True), name="frontend")

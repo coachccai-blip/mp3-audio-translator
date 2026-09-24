@@ -1,0 +1,72 @@
+name: Installateur Windows
+
+# Exécute l'installateur Windows sur une vraie machine Windows, puis un doublage de bout en bout
+# avec les vrais modèles (Demucs, Whisper large-v3) sur une phrase générée par la synthèse vocale de Windows.
+on:
+  push:
+    branches: [main]
+    paths: ["installer/**", "backend/**", "frontend/**", "scripts/**", ".github/workflows/windows-installer.yml"]
+  pull_request:
+    paths: ["installer/**", "backend/**", "frontend/**", "scripts/**", ".github/workflows/windows-installer.yml"]
+  workflow_dispatch:
+
+jobs:
+  install-and-dub:
+    runs-on: windows-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Générer une phrase parlée (synthèse vocale Windows)
+        shell: powershell
+        run: |
+          Add-Type -AssemblyName System.Speech
+          $s = New-Object System.Speech.Synthesis.SpeechSynthesizer
+          try { $s.SelectVoiceByHints([System.Speech.Synthesis.VoiceGender]::Female) } catch { }
+          $s.SetOutputToWaveFile("$env:RUNNER_TEMP\parole.wav")
+          $s.Speak("Welcome to this short training module. Today we will learn three simple rules to stay safe at work. Let's get started with the first one.")
+          $s.Dispose()
+          Get-Item "$env:RUNNER_TEMP\parole.wav"
+
+      - name: Lancer l'installateur (mode non interactif, branche testée)
+        shell: powershell
+        env:
+          DOUBLR_NONINTERACTIVE: "1"
+          DOUBLR_BRANCH: ${{ github.head_ref || github.ref_name }}
+        run: |
+          iex (Get-Content -Raw -Encoding UTF8 installer\windows\install.ps1)
+          if ($LASTEXITCODE -and $LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Journal d'installation
+        if: always()
+        shell: powershell
+        run: Get-Content "$env:LOCALAPPDATA\Doublr\install.log" -Tail 80 -ErrorAction SilentlyContinue
+
+      - name: Doublage gratuit de bout en bout (Demucs, Whisper, Ollama, Kokoro, Piper)
+        shell: powershell
+        run: |
+          $root = "$env:LOCALAPPDATA\Doublr"
+          $env:OLLAMA_MODELS = "$root\ollama-models"
+          $srv = Start-Process -FilePath "$root\tools\ollama\ollama.exe" -ArgumentList 'serve' -WindowStyle Hidden -PassThru
+          Start-Sleep 8
+          $py = "$root\app\.venv\Scripts\python.exe"
+          Push-Location "$root\app"
+          & $py scripts\smoke_test.py "$env:RUNNER_TEMP\parole.wav" --to fr-FR --to de-DE --to zh-CN
+          $code = $LASTEXITCODE
+          Pop-Location
+          Stop-Process -Id $srv.Id -Force -ErrorAction SilentlyContinue
+          if ($code -ne 0) { exit 1 }
+
+      - name: Le raccourci démarre le serveur et l'interface
+        shell: powershell
+        run: |
+          $launcher = "$env:LOCALAPPDATA\Doublr\Doublr.bat"
+          if (-not (Test-Path "$env:USERPROFILE\Desktop\Doublr.lnk") -and -not (Test-Path ([Environment]::GetFolderPath('Desktop') + '\Doublr.lnk'))) { throw 'Raccourci Bureau absent' }
+          $py = "$env:LOCALAPPDATA\Doublr\app\.venv\Scripts\python.exe"
+          $p = Start-Process -FilePath $py -ArgumentList '-m','uvicorn','app.main:app','--port','8000' -WorkingDirectory "$env:LOCALAPPDATA\Doublr\app\backend" -PassThru
+          Start-Sleep 15
+          $h = Invoke-RestMethod http://127.0.0.1:8000/api/health
+          $page = Invoke-WebRequest http://127.0.0.1:8000/ -UseBasicParsing
+          Stop-Process -Id $p.Id -Force
+          if (-not $h.ok -or $page.Content -notmatch '<title>Doublr</title>') { throw 'Serveur ou interface KO' }
+          Write-Host "Serveur et interface OK"

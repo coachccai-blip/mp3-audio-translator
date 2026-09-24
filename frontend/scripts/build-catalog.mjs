@@ -1,5 +1,5 @@
 // Copie le catalogue (config/*.yaml) en JSON pour le mode démo du frontend (GitHub Pages).
-import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { copyFileSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import YAML from "yaml";
@@ -19,3 +19,7 @@ const out = resolve(root, "frontend/src/data/catalog.json");
 mkdirSync(dirname(out), { recursive: true });
 writeFileSync(out, JSON.stringify({ languages, voices }, null, 1));
 console.log("catalog.json écrit");
+
+// Installateur Windows téléchargeable depuis le site (GitHub Pages).
+mkdirSync(resolve(root, "frontend/public"), { recursive: true });
+copyFileSync(resolve(root, "installer/windows/Installer-Doublr.bat"), resolve(root, "frontend/public/Installer-Doublr.bat"));

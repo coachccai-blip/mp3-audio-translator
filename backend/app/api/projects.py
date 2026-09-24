@@ -186,22 +186,38 @@ def get_estimate(pid: str):
     with session() as db:
         files = db.exec(select(AudioFile).where(AudioFile.project_id == pid, AudioFile.status != "invalid")).all()
     s = get_settings()
-    return estimate(sum(f.duration_ms for f in files) / 1000, max(1, len(p.targets)), s.claude_model,
-                    s.tts_provider, s.device)
+    provider = "kokoro"
+    for loc in p.targets:
+        try:
+            provider = get_catalog().default_voice(loc).provider
+            break
+        except NoNativeVoiceError:
+            continue
+    model = s.claude_model if s.translator_engine == "claude" else None
+    return estimate(sum(f.duration_ms for f in files) / 1000, max(1, len(p.targets)), model, provider, s.device)
 
 
 # --- Jobs -----------------------------------------------------------------------
 
-def _require_keys(need_translation: bool = True):
+def missing_requirements() -> list[str]:
+    """Ce qui manque pour lancer un doublage avec les réglages actuels (vide = prêt)."""
+    if _engines_overridden():
+        return []
     s = get_settings()
-    missing = []
-    if need_translation and not s.has_key("ANTHROPIC_API_KEY") and not _engines_overridden():
-        missing.append("ANTHROPIC_API_KEY")
-    if s.tts_provider == "azure" and not s.has_key("AZURE_SPEECH_KEY") and not _engines_overridden():
-        missing.append("AZURE_SPEECH_KEY")
+    if s.translator_engine == "claude":
+        return [] if s.has_key("ANTHROPIC_API_KEY") else ["ANTHROPIC_API_KEY"]
+    from ..pipeline.translate import ollama_status
+
+    return [] if ollama_status()["model_ready"] else ["LOCAL_LLM"]
+
+
+def _require_keys(need_translation: bool = True):
+    missing = missing_requirements() if need_translation else []
     if missing:
-        raise HTTPException(412, {"code": "missing_keys", "keys": missing,
-                                  "message": "Clé(s) API manquante(s) : renseignez-les dans Réglages."})
+        msg = ("Le traducteur local gratuit n'est pas prêt (Ollama et son modèle). Lancez Doublr avec son raccourci, "
+               "ou relancez l'installateur." if missing == ["LOCAL_LLM"]
+               else "Clé API manquante : renseignez-la dans Réglages.")
+        raise HTTPException(412, {"code": "missing_keys", "keys": missing, "message": msg})
 
 
 def _engines_overridden() -> bool:

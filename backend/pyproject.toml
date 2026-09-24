@@ -21,10 +21,17 @@ dependencies = [
 [project.optional-dependencies]
 # Modèles IA locaux (lourds : PyTorch). Installer avec `pip install -e ".[ai]"`.
 ai = [
-  "faster-whisper>=1.0",
-  "demucs>=4.0",
-  "pyannote.audio>=3.1",
+  # Versions figées et testées ensemble (voir .github/workflows/windows-installer.yml).
+  "torch==2.5.1",
+  "torchaudio==2.5.1",
+  "numpy>=2.0.2",
+  "faster-whisper>=1.1,<2",
+  "demucs==4.0.1",
+  "pyannote.audio>=3.3,<4",
   "pyrubberband>=0.3",
+  # Mode gratuit : voix locales
+  "kokoro-onnx>=0.4.9,<1",
+  "piper-tts>=1.3,<2",
 ]
 dev = ["pytest>=8", "httpx>=0.27"]
 

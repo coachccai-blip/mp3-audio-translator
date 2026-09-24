@@ -44,7 +44,7 @@ class Ctx:
     on_log: Callable[[str], None] = lambda msg: None
     on_text: Callable[[str], None] = lambda text: None
     cancel: threading.Event = field(default_factory=threading.Event)
-    tts_chars: int = 0
+    tts_chars: dict = field(default_factory=dict)  # fournisseur → caractères synthétisés
     tokens_in: int = 0
     tokens_out: int = 0
     lock: threading.Lock = field(default_factory=threading.Lock)
@@ -55,8 +55,9 @@ class Ctx:
 
     def cost_usd(self) -> float:
         s = get_settings()
-        return claude_cost(s.claude_model, self.tokens_in, self.tokens_out) + \
-            self.tts_chars / 1e6 * TTS_PRICE_PER_MCHAR.get(s.tts_provider, 16.0)
+        translation = claude_cost(s.claude_model, self.tokens_in, self.tokens_out) \
+            if s.translator_engine == "claude" else 0.0
+        return translation + sum(n / 1e6 * TTS_PRICE_PER_MCHAR.get(p, 16.0) for p, n in self.tts_chars.items())
 
 
 def _hash(*parts) -> str:
@@ -123,7 +124,13 @@ def prepare_file(ctx: Ctx, f: AudioFile, project: Project) -> None:
     ctx.check()
 
     ctx.on_step("diarize", "running", None)
-    units = assign_speakers(tr.units, eng.diarize(sep.vocals))
+    try:
+        turns = eng.diarize(sep.vocals)
+    except Exception as exc:  # diarisation facultative : on continue avec un seul locuteur
+        ctx.on_log(f"Détection des locuteurs indisponible ({exc}) : un seul locuteur sera utilisé.")
+        _add_warning(f, "no_diarization")
+        turns = []
+    units = assign_speakers(tr.units, turns)
     ctx.on_step("diarize", "done", None)
 
     vocals, sr = A.load(sep.vocals)
@@ -203,7 +210,7 @@ def cached_synth(ctx: Ctx, cache_dir: Path, voice_id: str) -> Callable[[str], Au
             return AudioSegment(data, sr)
         seg = get_engines().tts(provider_name).synthesize_with_retry(text, voice_id)
         with ctx.lock:
-            ctx.tts_chars += len(text)
+            ctx.tts_chars[provider_name] = ctx.tts_chars.get(provider_name, 0) + len(text)
         sf.write(str(p), seg.samples, seg.sample_rate, subtype="FLOAT")
         return seg
 

@@ -76,6 +76,7 @@ def cmd_dub(args) -> int:
 
 
 def main(argv=None) -> int:
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     ap = argparse.ArgumentParser(prog="doublr")
     sub = ap.add_subparsers(dest="cmd", required=True)
     d = sub.add_parser("dub", help="Doubler un fichier audio")

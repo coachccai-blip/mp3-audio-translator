@@ -1,7 +1,10 @@
 import type { Api, AudioSource, JobSnapshot, Project } from "./types";
 import { ApiError } from "./types";
 
-export const DEFAULT_API = import.meta.env.VITE_API_URL || "http://localhost:8000";
+// VITE_SAME_ORIGIN=1 : interface servie par le serveur local lui-même (installateur Windows).
+export const DEFAULT_API = import.meta.env.VITE_SAME_ORIGIN === "1"
+  ? window.location.origin
+  : import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 export function storedApiBase(): string {
   try {
