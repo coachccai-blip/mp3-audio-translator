@@ -86,7 +86,8 @@ export default function App() {
       <main id="main" className="mx-auto max-w-6xl space-y-6 px-4 py-8">
         {ready && api.mode === "demo" && (
           <Banner tone="info" title={t("mode.demo.title")} action={
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
+              <a className="btn-primary btn-sm" href={`${import.meta.env.BASE_URL}Installer-Doublr.bat`} download>{t("mode.demo.install")}</a>
               <a className="btn-secondary btn-sm" href="#/settings">{t("mode.demo.connect")}</a>
               <a className="btn-ghost btn-sm" href={README} target="_blank" rel="noreferrer">{t("mode.demo.howto")}</a>
             </div>}>

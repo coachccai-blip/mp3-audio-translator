@@ -6,7 +6,7 @@ const it: Dict = {
   "common.pause": "Pausa", "common.loading": "Caricamento…", "common.error": "Errore", "common.all": "Tutti",
   "mode.demo.title": "Modalità demo",
   "mode.demo.body": "Nessun server Doublr locale rilevato. L'analisi dei file è reale, ma traduzione e voci sono simulate. Installa Doublr sul tuo computer per ottenere doppiaggi reali.",
-  "mode.demo.connect": "Collega il mio server locale", "mode.demo.howto": "Guida all'installazione",
+  "mode.demo.install": "Installa su Windows", "mode.demo.connect": "Collega il mio server locale", "mode.demo.howto": "Guida all'installazione",
   "banner.missingKeys": "Chiavi API mancanti: {keys}. Il doppiaggio verrà bloccato all'avvio.", "banner.goSettings": "Apri le impostazioni",
   "flow.import": "Importa", "flow.configure": "Configurazione", "flow.speakers": "Voci", "flow.processing": "Elaborazione",
   "flow.review": "Revisione", "flow.export": "Esporta",

@@ -6,7 +6,7 @@ const zh: Dict = {
   "common.pause": "暂停", "common.loading": "加载中…", "common.error": "错误", "common.all": "全部",
   "mode.demo.title": "演示模式",
   "mode.demo.body": "未检测到本地 Doublr 服务器。文件分析是真实的，但翻译和配音为模拟结果。请在电脑上安装 Doublr 以生成真正的配音。",
-  "mode.demo.connect": "连接我的本地服务器", "mode.demo.howto": "安装指南",
+  "mode.demo.install": "在 Windows 上安装", "mode.demo.connect": "连接我的本地服务器", "mode.demo.howto": "安装指南",
   "banner.missingKeys": "缺少 API 密钥：{keys}。启动配音时将被阻止。", "banner.goSettings": "打开设置",
   "flow.import": "导入", "flow.configure": "配置", "flow.speakers": "声音", "flow.processing": "处理",
   "flow.review": "审阅", "flow.export": "导出",

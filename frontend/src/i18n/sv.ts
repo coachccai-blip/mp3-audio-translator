@@ -6,7 +6,7 @@ const sv: Dict = {
   "common.pause": "Paus", "common.loading": "Laddar…", "common.error": "Fel", "common.all": "Alla",
   "mode.demo.title": "Demoläge",
   "mode.demo.body": "Ingen lokal Doublr-server hittades. Analysen av dina filer är verklig, men översättning och röster simuleras. Installera Doublr på din dator för att skapa riktiga dubbningar.",
-  "mode.demo.connect": "Anslut min lokala server", "mode.demo.howto": "Installationsguide",
+  "mode.demo.install": "Installera på Windows", "mode.demo.connect": "Anslut min lokala server", "mode.demo.howto": "Installationsguide",
   "banner.missingKeys": "API-nycklar saknas: {keys}. Dubbningen blockeras vid start.", "banner.goSettings": "Öppna inställningar",
   "flow.import": "Import", "flow.configure": "Inställning", "flow.speakers": "Röster", "flow.processing": "Bearbetning",
   "flow.review": "Granskning", "flow.export": "Export",

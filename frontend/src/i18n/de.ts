@@ -6,7 +6,7 @@ const de: Dict = {
   "common.pause": "Pause", "common.loading": "Wird geladen…", "common.error": "Fehler", "common.all": "Alle",
   "mode.demo.title": "Demomodus",
   "mode.demo.body": "Kein lokaler Doublr-Server gefunden. Die Dateianalyse ist echt, Übersetzung und Stimmen werden jedoch simuliert. Installieren Sie Doublr auf Ihrem Rechner, um echte Synchronisationen zu erstellen.",
-  "mode.demo.connect": "Lokalen Server verbinden", "mode.demo.howto": "Installationsanleitung",
+  "mode.demo.install": "Unter Windows installieren", "mode.demo.connect": "Lokalen Server verbinden", "mode.demo.howto": "Installationsanleitung",
   "banner.missingKeys": "Fehlende API-Schlüssel: {keys}. Die Synchronisation wird beim Start blockiert.", "banner.goSettings": "Einstellungen öffnen",
   "flow.import": "Import", "flow.configure": "Einrichtung", "flow.speakers": "Stimmen", "flow.processing": "Verarbeitung",
   "flow.review": "Prüfung", "flow.export": "Export",

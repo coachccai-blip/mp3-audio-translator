@@ -26,7 +26,17 @@ GitHub Pages n'héberge que des pages statiques : il ne peut pas faire tourner W
 
 ---
 
-## Installation (serveur local)
+## Installation sur Windows (recommandé : en un double-clic)
+
+1. Téléchargez **[Installer-Doublr.bat](https://coachccai-blip.github.io/mp3-audio-translator/Installer-Doublr.bat)** (bouton « Installer sur Windows » sur le site).
+2. Double-cliquez dessus. Si Windows affiche « Windows a protégé votre ordinateur », cliquez sur **Informations complémentaires → Exécuter quand même**.
+3. Laissez faire (15 à 40 min, ~6 Go) : Python, Node.js, PyTorch, Whisper large-v3, Demucs et pyannote sont installés dans `%LOCALAPPDATA%\Doublr`, **sans droits administrateur**. Une carte NVIDIA est détectée et utilisée automatiquement.
+4. Collez vos clés API quand elles sont demandées (ou plus tard dans Réglages).
+5. Double-cliquez sur le raccourci **Doublr** du Bureau : le serveur démarre et Doublr s'ouvre dans votre navigateur (`http://localhost:8000`). Laissez la fenêtre noire ouverte pendant l'utilisation.
+
+Les fichiers doublés vont dans `Documents\Doublr`. Pour mettre à jour : menu Démarrer → **Mettre à jour Doublr** (vos clés et projets sont conservés).
+
+## Installation manuelle (macOS, Linux, Windows)
 
 Prérequis : Python 3.11+, Node 20+, FFmpeg et Rubber Band (time-stretching haute qualité).
 

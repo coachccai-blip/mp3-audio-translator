@@ -101,9 +101,12 @@ def whisper_available() -> bool:
 def _model(name: str, device: str):
     from faster_whisper import WhisperModel
 
-    dev = "auto" if device == "auto" else ("cuda" if device == "cuda" else "cpu")
-    compute = "float16" if dev == "cuda" else "int8"
-    return WhisperModel(name, device=dev, compute_type=compute if dev != "auto" else "default")
+    if device in ("cuda", "auto"):
+        try:
+            return WhisperModel(name, device="cuda", compute_type="float16")
+        except Exception:  # pas de GPU NVIDIA / bibliothèques CUDA absentes → CPU
+            pass
+    return WhisperModel(name, device="cpu", compute_type="int8")
 
 
 def transcribe(path: Path, model_name: str = "large-v3", device: str = "auto", language: str | None = None,

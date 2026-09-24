@@ -6,7 +6,7 @@ const pl: Dict = {
   "common.pause": "Pauza", "common.loading": "Wczytywanie…", "common.error": "Błąd", "common.all": "Wszystkie",
   "mode.demo.title": "Tryb demo",
   "mode.demo.body": "Nie wykryto lokalnego serwera Doublr. Analiza plików jest prawdziwa, ale tłumaczenie i głosy są symulowane. Zainstaluj Doublr na swoim komputerze, aby tworzyć prawdziwy dubbing.",
-  "mode.demo.connect": "Połącz z moim serwerem lokalnym", "mode.demo.howto": "Instrukcja instalacji",
+  "mode.demo.install": "Zainstaluj w systemie Windows", "mode.demo.connect": "Połącz z moim serwerem lokalnym", "mode.demo.howto": "Instrukcja instalacji",
   "banner.missingKeys": "Brak kluczy API: {keys}. Dubbing zostanie zablokowany przy uruchomieniu.", "banner.goSettings": "Otwórz ustawienia",
   "flow.import": "Import", "flow.configure": "Konfiguracja", "flow.speakers": "Głosy", "flow.processing": "Przetwarzanie",
   "flow.review": "Weryfikacja", "flow.export": "Eksport",

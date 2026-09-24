@@ -22,7 +22,7 @@ def read_env_file(path: Path = ENV_FILE) -> dict[str, str]:
     values: dict[str, str] = {}
     if not path.exists():
         return values
-    for line in path.read_text(encoding="utf-8").splitlines():
+    for line in path.read_text(encoding="utf-8-sig").splitlines():
         line = line.strip()
         if not line or line.startswith("#") or "=" not in line:
             continue

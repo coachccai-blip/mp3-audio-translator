@@ -5,7 +5,7 @@ const fr = {
   "common.pause": "Pause", "common.loading": "Chargement…", "common.error": "Erreur", "common.all": "Tous",
   "mode.demo.title": "Mode démo",
   "mode.demo.body": "Aucun serveur Doublr local détecté. L'analyse de vos fichiers est réelle, mais la traduction et les voix sont simulées. Installez Doublr sur votre machine pour produire de vrais doublages.",
-  "mode.demo.connect": "Connecter mon serveur local", "mode.demo.howto": "Guide d'installation",
+  "mode.demo.install": "Installer sur Windows", "mode.demo.connect": "Connecter mon serveur local", "mode.demo.howto": "Guide d'installation",
   "banner.missingKeys": "Clés API manquantes : {keys}. Le doublage sera bloqué au lancement.",
   "banner.goSettings": "Ouvrir les réglages",
   "flow.import": "Import", "flow.configure": "Configuration", "flow.speakers": "Voix", "flow.processing": "Traitement",
