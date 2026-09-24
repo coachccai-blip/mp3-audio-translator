@@ -32,7 +32,7 @@ function Invoke-Logged([string]$exe, [string[]]$ArgList, [string]$what) {
     # PowerShell 5 transforme la sortie d'erreur des programmes en exceptions : on la journalise sans s'arrêter.
     $prev = $ErrorActionPreference
     $ErrorActionPreference = 'Continue'
-    & $exe @ArgList *>> $Log
+    & $exe @ArgList 2>&1 | Out-File -FilePath $Log -Append -Encoding utf8
     $code = $LASTEXITCODE
     $ErrorActionPreference = $prev
     if ($code -ne 0) { Fail "$what a échoué (code $code)." }
@@ -103,7 +103,7 @@ New-Item -ItemType Directory -Force -Path $App | Out-Null
 $ErrorActionPreference = 'Continue'
 & robocopy $src.FullName $App /MIR /NFL /NDL /NJH /NJS /NP `
     /XD (Join-Path $App '.venv') (Join-Path $App 'data') (Join-Path $App 'exports') (Join-Path $App 'frontend\node_modules') `
-    /XF (Join-Path $App '.env') *>> $Log
+    /XF (Join-Path $App '.env') 2>&1 | Out-File -FilePath $Log -Append -Encoding utf8
 $code = $LASTEXITCODE
 $ErrorActionPreference = 'Stop'
 if ($code -ge 8) { Fail "Copie des fichiers impossible (robocopy $code)." }
@@ -135,8 +135,8 @@ Pop-Location
 
 # --- 6. Modèles ------------------------------------------------------------------------
 Step 6 'Téléchargement des modèles (Whisper large-v3 ≈ 3 Go, Demucs ≈ 80 Mo)'
-Invoke-Logged $VPy @('-c', 'from faster_whisper import WhisperModel; WhisperModel("large-v3", device="cpu", compute_type="int8")') 'Le téléchargement du modèle Whisper'
-Invoke-Logged $VPy @('-c', 'from demucs.pretrained import get_model; get_model("htdemucs")') 'Le téléchargement du modèle Demucs'
+# (Script Python dédié : PowerShell 5 retire les guillemets des arguments passés à un programme.)
+Invoke-Logged $VPy @((Join-Path $App 'scripts\download_models.py')) 'Le téléchargement des modèles'
 
 # --- 7. Clés API -------------------------------------------------------------------------
 Step 7 'Configuration'
