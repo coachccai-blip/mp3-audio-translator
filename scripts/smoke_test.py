@@ -18,6 +18,8 @@ sys.path.insert(0, str(ROOT / "backend"))
 
 
 def main() -> int:
+    # La console Windows (cp1252) ne sait pas afficher tous les caractères.
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     ap = argparse.ArgumentParser()
     ap.add_argument("audio")
     ap.add_argument("--to", default="fr-FR")

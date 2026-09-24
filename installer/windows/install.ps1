@@ -185,6 +185,7 @@ $Launcher = Join-Path $Root 'Doublr.bat'
 @(
     '@echo off',
     'title Doublr',
+    'set PYTHONUTF8=1',
     "cd /d `"$(Join-Path $App 'backend')`"",
     'echo.',
     'echo   Doublr demarre. Laissez cette fenetre ouverte pendant que vous utilisez Doublr.',
