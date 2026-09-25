@@ -155,10 +155,15 @@ def build_batch_user_prompt(reqs: list[TranslationRequest], before: list[str], a
         line = f"[{i}] ({r.target_seconds:.1f} s, target ~{target} {unit}, max {r.max_units}) {r.text}"
         if r.previous:
             p = r.previous
-            pct = (1 - 1 / p.ratio) * 100 if p.ratio > 1 else (1 - p.ratio) * 100
-            verb = "shorten" if p.ratio > 1 else "lengthen"
-            line += (f"\n    previous translation: {p.text}\n    it lasted {p.actual_seconds:.1f} s "
-                     f"instead of {r.target_seconds:.1f} s: {verb} by about {abs(pct):.0f}%")
+            have = count_units(p.text, r.target_locale)
+            delta = have - target
+            verb = f"REMOVE about {delta}" if delta > 0 else f"ADD about {-delta}"
+            line += (f"\n    previous translation ({have} {unit}, lasted {p.actual_seconds:.1f} s instead of "
+                     f"{r.target_seconds:.1f} s): {p.text}\n    rewrite it with ~{target} {unit}: {verb} {unit}, "
+                     "keeping the meaning (drop filler words, use shorter synonyms)" if delta > 0 else
+                     f"\n    previous translation ({have} {unit}, lasted {p.actual_seconds:.1f} s instead of "
+                     f"{r.target_seconds:.1f} s): {p.text}\n    rewrite it with ~{target} {unit}: {verb} {unit}, "
+                     "keeping the meaning (no new information)")
         lines.append(line)
     parts.append("Lines to translate:\n" + "\n".join(lines))
     if after:
@@ -366,7 +371,21 @@ class OllamaTranslator:
     def translate_many(self, reqs: list[TranslationRequest]) -> list[TranslationResult | None]:
         return translate_in_batches(self, reqs, lambda sys_p, user, n: self._chat(sys_p, user, _BatchOut, 120 + 90 * n))
 
+    def warm_up(self) -> None:
+        """Charge le modèle en mémoire en arrière-plan (pendant la transcription) pour gagner ~10-30 s."""
+        import httpx
+
+        try:
+            httpx.post(f"{self.url}/api/generate", json={"model": self.model, "keep_alive": "30m"}, timeout=120)
+        except Exception:
+            pass
+
     def analyze_document(self, text: str, source_lang: str, target_locale: str) -> DocumentAnalysis:
+        # Sur processeur, cette analyse coûte autant qu'une traduction : le modèle local déduit le registre
+        # du contexte, et les lots donnent la cohérence des termes (le glossaire utilisateur reste appliqué).
+        return DocumentAnalysis(register="auto (infer it from the lines)", terms=[])
+
+    def _analyze_document_full(self, text: str, source_lang: str, target_locale: str) -> DocumentAnalysis:
         target = LANG_NAMES.get(target_locale.split("-")[0], target_locale)
         system = (
             "You prepare a transcript for dubbing. Give its speech_register (one of: formal, conversational, "

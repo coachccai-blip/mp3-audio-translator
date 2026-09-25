@@ -114,6 +114,12 @@ def prepare_file(ctx: Ctx, f: AudioFile, project: Project) -> None:
     ctx.on_step("separate", "done", sep.engine)
     ctx.check()
 
+    try:  # charge le modèle de traduction local pendant la transcription (facultatif)
+        translator = eng.translator()
+        if hasattr(translator, "warm_up"):
+            threading.Thread(target=translator.warm_up, daemon=True).start()
+    except Exception:
+        pass
     ctx.on_step("transcribe", "running", None)
     language = project.source_lang if project.settings.get("source_locked") else None
     try:
@@ -382,6 +388,8 @@ def dub_file(ctx: Ctx, f: AudioFile, project: Project, locale: str) -> dict:
     synths = {v: cached_synth(ctx, ldir / "cache" / "tts", v) for v in set(voices.values())}
     targets = {i: (u.end - u.start) * 1000 for i, u in enumerate(units)}
     best: dict[int, Take] = {}
+    latest: dict[int, Take] = {}     # dernière prise (base de la retraduction suivante)
+    tried: dict[int, set[str]] = {i: set() for i in range(n)}
     retranslations = {i: 0 for i in range(n)}
     done = [0]
 
@@ -391,6 +399,8 @@ def dub_file(ctx: Ctx, f: AudioFile, project: Project, locale: str) -> dict:
             t = take(synths[voices[i]], text, targets[i], True, _native_rate_threshold(voices[i], tolerance))
             with ctx.lock:
                 best[i] = better(best.get(i), t)
+                latest[i] = t
+                tried[i].add(text)
         except TTSError as exc:
             errors[i] = str(exc)
 
@@ -414,7 +424,7 @@ def dub_file(ctx: Ctx, f: AudioFile, project: Project, locale: str) -> dict:
         rates = _voice_rates(best, units, voices, locale)
         reqs = []
         for i in bad:
-            req = retranslation_request(requests[i], best[i])
+            req = retranslation_request(requests[i], latest[i])
             rate = rates.get(voices[i])
             if rate:  # budget recalculé sur le débit réellement mesuré de la voix choisie
                 secs = targets[i] / 1000
@@ -422,7 +432,7 @@ def dub_file(ctx: Ctx, f: AudioFile, project: Project, locale: str) -> dict:
                 req.max_units = max(req.target_units, int(secs * rate * 1.05))
             reqs.append(req)
         results = translator.translate_many(reqs)
-        items = [(i, r.text) for i, r in zip(bad, results) if r is not None and r.text != best[i].text]
+        items = [(i, r.text) for i, r in zip(bad, results) if r is not None and r.text not in tried[i]]
         for i, _ in items:
             retranslations[i] += 1
         if not items:
