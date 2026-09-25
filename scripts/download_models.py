@@ -9,7 +9,7 @@ import argparse
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--whisper", default="large-v3-turbo")
+    ap.add_argument("--whisper", default="large-v3")
     args = ap.parse_args()
     from faster_whisper import WhisperModel
 

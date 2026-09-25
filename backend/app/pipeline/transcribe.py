@@ -122,7 +122,7 @@ def _on_gpu(model) -> bool:
         return False
 
 
-def transcribe(path: Path, model_name: str = "large-v3-turbo", device: str = "auto", language: str | None = None,
+def transcribe(path: Path, model_name: str = "large-v3", device: str = "auto", language: str | None = None,
                on_unit=None) -> Transcript:
     if not whisper_available():
         raise TranscriptionUnavailable("faster-whisper n'est pas installé (pip install -e \".[ai]\").")
@@ -149,7 +149,7 @@ def transcribe(path: Path, model_name: str = "large-v3-turbo", device: str = "au
                       units=group_words(words))
 
 
-def detect_language(path: Path, model_name: str = "large-v3-turbo", device: str = "auto") -> tuple[str, float] | None:
+def detect_language(path: Path, model_name: str = "large-v3", device: str = "auto") -> tuple[str, float] | None:
     """Détection rapide de la langue source (30 premières secondes)."""
     if not whisper_available():
         return None

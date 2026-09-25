@@ -77,7 +77,7 @@ class Settings:
     models_dir: Path = field(default_factory=lambda: Path(_get("DOUBLR_MODELS_DIR", str(ROOT_DIR / "data" / "models"))))
     azure_region: str = field(default_factory=lambda: _get("AZURE_SPEECH_REGION", "westeurope"))
     claude_model: str = field(default_factory=lambda: _get("DOUBLR_CLAUDE_MODEL", "claude-opus-5"))
-    whisper_model: str = field(default_factory=lambda: _get("DOUBLR_WHISPER_MODEL", "large-v3-turbo"))
+    whisper_model: str = field(default_factory=lambda: _get("DOUBLR_WHISPER_MODEL", "large-v3"))
     device: str = field(default_factory=lambda: _get("DOUBLR_DEVICE", "auto"))
     tts_concurrency: int = field(default_factory=lambda: int(_get("DOUBLR_TTS_CONCURRENCY", "4")))
     file_concurrency: int = field(default_factory=lambda: int(_get("DOUBLR_FILE_CONCURRENCY", "2")))

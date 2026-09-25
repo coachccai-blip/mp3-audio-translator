@@ -135,7 +135,7 @@ Remove-Item Env:\VITE_SAME_ORIGIN
 Pop-Location
 
 # --- 6. Modèles ------------------------------------------------------------------------
-Step 6 'Téléchargement des modèles (Whisper turbo ≈ 1,6 Go, Demucs, voix Kokoro et Piper ≈ 1,5 Go)'
+Step 6 'Téléchargement des modèles (Whisper ≈ 3 Go, Demucs, voix Kokoro et Piper ≈ 1,5 Go)'
 # (Script Python dédié : PowerShell 5 retire les guillemets des arguments passés à un programme.)
 Invoke-Logged $VPy @((Join-Path $App 'scripts\download_models.py')) 'Le téléchargement des modèles'
 
