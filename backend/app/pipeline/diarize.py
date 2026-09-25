@@ -32,9 +32,18 @@ def _pipeline():
 
 
 def diarize(path: Path) -> list[tuple[float, float, str]]:
-    """Renvoie des tours de parole (début, fin, locuteur). Liste vide si indisponible."""
+    """Renvoie des tours de parole (début, fin, locuteur). Liste vide si indisponible.
+
+    pyannote (PyTorch) tourne dans le processus dédié : voir worker.py.
+    """
     if not pyannote_available():
         return []
+    from . import worker
+
+    return [tuple(t) for t in worker.run("diarize.diarize_here", str(path))]
+
+
+def diarize_here(path: str) -> list[tuple[float, float, str]]:
     import torch
 
     from .audio import load

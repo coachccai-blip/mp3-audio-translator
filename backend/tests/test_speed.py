@@ -66,3 +66,16 @@ def test_pipeline_translates_in_few_batched_calls_and_remembers_voice_rate(app_e
     assert 1 <= tr.batch_calls <= 4                     # 1 lot + au plus 3 tours de retraduction groupée
     rates = json.loads((Path(app_env["tmp"]) / "data" / "voice_rates.json").read_text())
     assert rates and all(2 < r < 12 for r in rates.values())
+
+
+def test_torch_models_run_in_a_separate_reused_process():
+    """Demucs/pyannote hors du processus de Whisper (runtimes OpenMP concurrents : Whisper 8× plus lent)."""
+    import os
+
+    from app.pipeline import worker
+
+    assert worker.run("syllables.count_units", "Bonjour à tous", "fr-FR") == 4
+    pids = set(worker._get_pool()._processes)
+    assert pids and os.getpid() not in pids
+    worker.run("syllables.count_units", "encore", "fr-FR")
+    assert set(worker._get_pool()._processes) == pids  # même processus : modèle gardé en mémoire
