@@ -402,12 +402,14 @@ def patch_segment(sid: str, body: SegmentPatch):
     if not seg:
         raise HTTPException(404, "Segment introuvable")
     mode = "edit"
+    rate = None
     if body.action in ("undo", "redo"):
         pos = seg.history_pos + (-1 if body.action == "undo" else 1)
         if not 0 <= pos < len(seg.history):
             raise HTTPException(409, "Rien à annuler / rétablir")
         state = seg.history[pos]
         seg.target_text_edited, seg.voice_override, seg.history_pos = state["target_text_edited"], state["voice_override"], pos
+        rate = state.get("rate")
     else:
         if body.target_text is not None:
             seg.target_text_edited = body.target_text if body.target_text != seg.target_text else None
@@ -425,14 +427,12 @@ def patch_segment(sid: str, body: SegmentPatch):
         db.merge(seg)
         db.commit()
     try:
-        seg = runner.regenerate_segment(sid, mode)
+        seg = runner.regenerate_segment(sid, mode, rate=rate, record=body.action not in ("undo", "redo"))
     except Exception as exc:  # noqa: BLE001
         raise HTTPException(502, f"Régénération impossible : {exc}")
-    if body.action not in ("undo", "redo"):
-        runner.push_history(seg)
-        with session() as db:
-            db.merge(seg)
-            db.commit()
+    with session() as db:
+        db.merge(seg)
+        db.commit()
     return {**seg.model_dump(), "effective_text": seg.effective_text,
             "can_undo": seg.history_pos > 0, "can_redo": seg.history_pos < len(seg.history) - 1}
 

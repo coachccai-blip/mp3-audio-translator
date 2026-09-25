@@ -99,6 +99,8 @@ def whisper_available() -> bool:
 
 @lru_cache(maxsize=2)
 def _model(name: str, device: str):
+    import os
+
     from faster_whisper import WhisperModel
 
     if device in ("cuda", "auto"):
@@ -106,15 +108,30 @@ def _model(name: str, device: str):
             return WhisperModel(name, device="cuda", compute_type="float16")
         except Exception:  # pas de GPU NVIDIA / bibliothèques CUDA absentes → CPU
             pass
-    return WhisperModel(name, device="cpu", compute_type="int8")
+    return WhisperModel(name, device="cpu", compute_type="int8", cpu_threads=os.cpu_count() or 4)
 
 
-def transcribe(path: Path, model_name: str = "large-v3", device: str = "auto", language: str | None = None,
+def _on_gpu(model) -> bool:
+    try:
+        return model.model.device == "cuda"
+    except Exception:
+        return False
+
+
+def transcribe(path: Path, model_name: str = "large-v3-turbo", device: str = "auto", language: str | None = None,
                on_unit=None) -> Transcript:
     if not whisper_available():
         raise TranscriptionUnavailable("faster-whisper n'est pas installé (pip install -e \".[ai]\").")
     model = _model(model_name, device)
-    segments, info = model.transcribe(str(path), language=language, word_timestamps=True, vad_filter=True)
+    try:
+        # Transcription par lots (plusieurs morceaux décodés ensemble) : nettement plus rapide.
+        from faster_whisper import BatchedInferencePipeline
+
+        batched = BatchedInferencePipeline(model=model)
+        segments, info = batched.transcribe(str(path), language=language, word_timestamps=True,
+                                            batch_size=16 if _on_gpu(model) else 8)
+    except Exception:
+        segments, info = model.transcribe(str(path), language=language, word_timestamps=True, vad_filter=True)
     words: list[Word] = []
     for seg in segments:
         for w in seg.words or []:
@@ -125,7 +142,7 @@ def transcribe(path: Path, model_name: str = "large-v3", device: str = "auto", l
                       units=group_words(words))
 
 
-def detect_language(path: Path, model_name: str = "large-v3", device: str = "auto") -> tuple[str, float] | None:
+def detect_language(path: Path, model_name: str = "large-v3-turbo", device: str = "auto") -> tuple[str, float] | None:
     """Détection rapide de la langue source (30 premières secondes)."""
     if not whisper_available():
         return None

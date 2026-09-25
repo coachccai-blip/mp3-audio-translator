@@ -135,7 +135,7 @@ Remove-Item Env:\VITE_SAME_ORIGIN
 Pop-Location
 
 # --- 6. Modèles ------------------------------------------------------------------------
-Step 6 'Téléchargement des modèles (Whisper ≈ 3 Go, Demucs, voix Kokoro et Piper ≈ 1,5 Go)'
+Step 6 'Téléchargement des modèles (Whisper turbo ≈ 1,6 Go, Demucs, voix Kokoro et Piper ≈ 1,5 Go)'
 # (Script Python dédié : PowerShell 5 retire les guillemets des arguments passés à un programme.)
 Invoke-Logged $VPy @((Join-Path $App 'scripts\download_models.py')) 'Le téléchargement des modèles'
 
@@ -183,7 +183,16 @@ if (-not $NonInteractive -and (Get-EnvValue 'AZURE_SPEECH_KEY')) {
 
 # --- 8. Traducteur local gratuit (Ollama) ----------------------------------------------------
 $LocalLlm = Get-EnvValue 'DOUBLR_LOCAL_LLM'
-if (-not $LocalLlm) { $LocalLlm = 'gemma3:4b'; Set-EnvValue 'DOUBLR_LOCAL_LLM' $LocalLlm }
+if (-not $LocalLlm) {
+    # Carte graphique NVIDIA avec au moins 10 Go : modèle 12B (meilleure traduction) ; sinon 4B (rapide sur processeur).
+    $LocalLlm = 'gemma3:4b'
+    try {
+        $vram = & nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits 2>$null | Select-Object -First 1
+        if ($vram -and [int]$vram -ge 10000) { $LocalLlm = 'gemma3:12b' }
+    } catch { }
+    if ($env:DOUBLR_LOCAL_LLM_OVERRIDE) { $LocalLlm = $env:DOUBLR_LOCAL_LLM_OVERRIDE }
+    Set-EnvValue 'DOUBLR_LOCAL_LLM' $LocalLlm
+}
 Step 8 "Traducteur gratuit (Ollama + modèle $LocalLlm ≈ 3 Go)"
 $OllamaDir = Join-Path $Tools 'ollama'
 $OllamaExe = Join-Path $OllamaDir 'ollama.exe'
@@ -216,6 +225,8 @@ $Launcher = Join-Path $Root 'Doublr.bat'
     'title Doublr',
     'set PYTHONUTF8=1',
     "set OLLAMA_MODELS=$OllamaModels",
+    'set OLLAMA_KEEP_ALIVE=30m',
+    'set OLLAMA_FLASH_ATTENTION=1',
     "start `"Ollama`" /min `"$OllamaExe`" serve",
     "cd /d `"$(Join-Path $App 'backend')`"",
     'echo.',

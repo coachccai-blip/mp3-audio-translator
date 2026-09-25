@@ -90,8 +90,8 @@ export function ConfigurePage({ project, onChange }: { project: Project; onChang
               <legend className="label">{t("configure.quality")}</legend>
               <div className="flex gap-2">
                 {(["fast", "precise"] as const).map((q) => (
-                  <label key={q} className={`btn-secondary btn-sm cursor-pointer ${ (s.quality || "precise") === q ? "border-primary text-primary" : ""}`}>
-                    <input type="radio" name="quality" className="sr-only" checked={(s.quality || "precise") === q} onChange={() => setSetting({ quality: q })} />
+                  <label key={q} className={`btn-secondary btn-sm cursor-pointer ${ (s.quality || "fast") === q ? "border-primary text-primary" : ""}`}>
+                    <input type="radio" name="quality" className="sr-only" checked={(s.quality || "fast") === q} onChange={() => setSetting({ quality: q })} />
                     {t(`quality.${q}`)}
                   </label>
                 ))}

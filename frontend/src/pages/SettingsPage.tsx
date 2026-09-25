@@ -125,8 +125,8 @@ export function SettingsPage({ theme, setTheme }: { theme: ThemePref; setTheme: 
           </select>
         </label>
         <label className="block"><span className="label">{t("settings.whisper")}</span>
-          <select className="input" disabled={!local} value={settings?.whisper_model || "large-v3"} onChange={(e) => save({ values: { DOUBLR_WHISPER_MODEL: e.target.value } })}>
-            <option value="large-v3">large-v3</option><option value="medium">medium</option>
+          <select className="input" disabled={!local} value={settings?.whisper_model || "large-v3-turbo"} onChange={(e) => save({ values: { DOUBLR_WHISPER_MODEL: e.target.value } })}>
+            <option value="large-v3-turbo">large-v3-turbo</option><option value="large-v3">large-v3</option>
           </select>
         </label>
         <label className="block"><span className="label">{t("settings.device")}</span>
