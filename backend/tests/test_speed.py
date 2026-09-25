@@ -66,3 +66,45 @@ def test_pipeline_translates_in_few_batched_calls_and_remembers_voice_rate(app_e
     assert 1 <= tr.batch_calls <= 4                     # 1 lot + au plus 3 tours de retraduction groupée
     rates = json.loads((Path(app_env["tmp"]) / "data" / "voice_rates.json").read_text())
     assert rates and all(2 < r < 12 for r in rates.values())
+
+
+def test_torch_models_run_in_a_separate_reused_process():
+    """Demucs/pyannote hors du processus de Whisper (runtimes OpenMP concurrents : Whisper 8× plus lent)."""
+    import os
+
+    from app.pipeline import worker
+
+    assert worker.run("syllables.count_units", "Bonjour à tous", "fr-FR") == 4
+    pids = set(worker._get_pool()._processes)
+    assert pids and os.getpid() not in pids
+    worker.run("syllables.count_units", "encore", "fr-FR")
+    assert set(worker._get_pool()._processes) == pids  # même processus : modèle gardé en mémoire
+
+
+def test_gpu_crash_falls_back_to_cpu_without_killing_server():
+    """Plantage natif sur carte graphique (cuDNN) : le serveur reste debout, l'étape repasse sur processeur."""
+    import os
+
+    from app.pipeline import worker
+
+    assert worker.run_on_device("worker._crash_on_gpu", 42, device="cuda", pool="test") == 42
+    assert worker.gpu_broken("test")
+    pids = set(worker._get_pool("test")._processes)
+    assert worker.run_on_device("worker._crash_on_gpu", 7, device="cuda", pool="test") == 7  # directement sur CPU
+    assert set(worker._get_pool("test")._processes) == pids and os.getpid() not in pids
+
+
+def test_job_interrupted_by_server_restart_is_reported(app_env):
+    """Serveur arrêté pendant un traitement : après redémarrage, l'interface voit une erreur, pas « En cours »."""
+    from app.models import Job, session
+    from app.services.jobs import INTERRUPTED, manager
+
+    client = app_env["client"]
+    with session() as db:
+        db.add(Job(id="stale", project_id="p1", kind="run", status="running"))
+        db.commit()
+    assert manager.mark_interrupted() == 1
+    snap = client.get("/api/jobs/stale").json()
+    assert snap["status"] == "error" and snap["error"] == INTERRUPTED
+    assert client.get("/api/projects/p1/job").json()["id"] == "stale"
+    assert client.post("/api/jobs/stale/cancel").json()["status"] == "error"

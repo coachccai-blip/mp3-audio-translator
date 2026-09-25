@@ -74,6 +74,17 @@ def _separate_in_process(data: np.ndarray, sr: int, device: str) -> tuple[np.nda
     return back(vocals), back(background)
 
 
+def separate_to_files(src: str, vocals_path: str, background_path: str, device: str) -> bool:
+    """Exécuté dans le processus PyTorch (voir worker.py). Renvoie True s'il y a un fond sonore."""
+    data, sr = load(Path(src))
+    v, b = _separate_in_process(data, sr, device)
+    save(v, sr, Path(vocals_path))
+    if is_near_silent(b):
+        return False
+    save(b, sr, Path(background_path))
+    return True
+
+
 def separate(src: Path, out_dir: Path, device: str = "auto") -> Separation:
     out_dir.mkdir(parents=True, exist_ok=True)
     vocals, background = out_dir / "vocals.wav", out_dir / "background.wav"
@@ -84,18 +95,18 @@ def separate(src: Path, out_dir: Path, device: str = "auto") -> Separation:
         # Repli : pas de séparation → on considère que tout est voix, le fond n'est pas conservé.
         save(data, sr, vocals)
         return Separation(vocals, None, "none")
+    from . import worker
+
     try:
-        v, b = _separate_in_process(data, sr, device)
+        has_background = worker.run_on_device("separate.separate_to_files", str(src), str(vocals), str(background),
+                                              device=device, pool="torch")
+        return Separation(vocals, background if has_background else None, "demucs")
     except Exception:  # repli : Demucs en ligne de commande
-        v = b = None
-    if v is not None:
-        save(v, sr, vocals)
-        if is_near_silent(b):
-            return Separation(vocals, None, "demucs")
-        save(b, sr, background)
-        return Separation(vocals, background, "demucs")
+        pass
     cmd = [sys.executable, "-m", "demucs", "-n", "htdemucs", "--two-stems", "vocals", "-o", str(out_dir / "demucs")]
     engine = "demucs-cli"
+    if worker.gpu_broken("torch"):
+        device = "cpu"
     if device in ("cpu", "cuda", "mps"):
         cmd += ["-d", device]
     wav_in = out_dir / "input.wav"

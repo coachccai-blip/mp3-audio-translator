@@ -41,6 +41,8 @@ const es: Dict = {
   "step.translate": "Traducción", "step.synthesize": "Generación de voces", "step.assemble": "Montaje",
   "status.pending": "Pendiente", "status.running": "En curso", "status.done": "Terminado", "status.error": "Error", "status.skipped": "Omitido",
   "processing.summary": "Duración respetada con {ms} ms de margen • {n} segmento(s) por revisar", "processing.failed": "El proceso ha fallado",
+  "processing.offline": "El servidor de Doublr no responde. Compruebe que la ventana negra «Doublr» está abierta (si no, reinicie Doublr) y haga clic en «Reanudar».", "processing.lost": "Este proceso se interrumpió por un reinicio del servidor. Haga clic en «Reanudar»: se conservan los pasos ya hechos.",
+  "update.title": "Actualización", "update.available": "Hay una nueva versión de Doublr disponible", "update.body": "Correcciones y mejoras. La actualización tarda unos minutos; se conservan sus proyectos, ajustes y claves.", "update.button": "Actualizar Doublr", "update.confirm": "¿Actualizar Doublr ahora? El servidor se detiene, se abre una ventana de actualización y Doublr se reinicia solo (unos minutos). Evite actualizar durante un proceso.", "update.startedTitle": "Actualización en curso", "update.started": "Siga la ventana «Mise à jour de Doublr». Doublr se volverá a abrir solo al terminar: recargue entonces esta página.", "update.installed": "Versión instalada: {v}", "update.upToDate": "actualizada",
   "processing.cancelled": "Proceso cancelado", "processing.resume": "Reanudar (se conserva la caché)",
   "processing.toReview": "Revisar", "processing.toExport": "Exportar",
   "review.title": "Revisión", "review.original": "Original", "review.dubbed": "Doblado",

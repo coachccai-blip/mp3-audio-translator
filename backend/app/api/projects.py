@@ -248,23 +248,25 @@ def run(pid: str):
 
 @router.get("/projects/{pid}/job")
 def latest_job(pid: str):
-    st = jobs_service.manager.latest_for(pid)
-    return st.snapshot() if st else None
+    return jobs_service.manager.snapshot(project_id=pid)
 
 
 @router.get("/jobs/{jid}")
 def get_job(jid: str):
-    st = jobs_service.manager.get(jid)
-    if not st:
+    snap = jobs_service.manager.snapshot(job_id=jid)
+    if snap is None:
         raise HTTPException(404, "Job introuvable")
-    return st.snapshot()
+    return snap
 
 
 @router.post("/jobs/{jid}/cancel")
 def cancel_job(jid: str):
     st = jobs_service.manager.get(jid)
-    if not st:
-        raise HTTPException(404, "Job introuvable")
+    if not st:  # traitement d'avant un redémarrage : déjà arrêté
+        snap = jobs_service.manager.snapshot(job_id=jid)
+        if snap is None:
+            raise HTTPException(404, "Job introuvable")
+        return snap
     st.cancel.set()
     return st.snapshot()
 

@@ -41,6 +41,8 @@ const zh: Dict = {
   "step.translate": "翻译", "step.synthesize": "生成声音", "step.assemble": "合成",
   "status.pending": "待处理", "status.running": "进行中", "status.done": "已完成", "status.error": "错误", "status.skipped": "已跳过",
   "processing.summary": "时长误差在 {ms} 毫秒以内 • {n} 个片段待检查", "processing.failed": "处理失败",
+  "processing.offline": "Doublr 服务器没有响应。请确认黑色的“Doublr”窗口仍然打开（否则请重新启动 Doublr），然后点击“继续”。", "processing.lost": "服务器重启中断了此处理。请点击“继续”：已完成的步骤会保留。",
+  "update.title": "更新", "update.available": "Doublr 有新版本可用", "update.body": "包含修复和改进。更新需要几分钟；您的项目、设置和密钥都会保留。", "update.button": "更新 Doublr", "update.confirm": "现在更新 Doublr 吗？服务器会停止，随后打开更新窗口，完成后 Doublr 会自动重新启动（几分钟）。请不要在处理进行中时更新。", "update.startedTitle": "正在更新", "update.started": "请查看“Mise à jour de Doublr”窗口。完成后 Doublr 会自动重新打开，届时请刷新此页面。", "update.installed": "已安装版本：{v}", "update.upToDate": "已是最新",
   "processing.cancelled": "处理已取消", "processing.resume": "继续（保留缓存）",
   "processing.toReview": "审阅", "processing.toExport": "导出",
   "review.title": "审阅", "review.original": "原声", "review.dubbed": "配音",

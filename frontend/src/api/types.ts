@@ -52,6 +52,8 @@ export interface Report {
   counts: Record<string, number>; warnings: string[];
 }
 export interface Estimate { total_seconds: number; processing_seconds: number; cost_usd: number }
+export interface VersionInfo { sha: string | null; branch: string; installed_at: string | null; can_update: boolean }
+
 export interface SettingsT {
   keys: Record<string, boolean>; tts_provider: string; whisper_model: string; device: string; azure_region: string;
   claude_model: string; output_dir: string; data_dir: string; cache_bytes: number; require_validated_voices: boolean;
@@ -112,4 +114,6 @@ export interface Api {
   putSettings(body: { keys?: Record<string, string>; values?: Record<string, string> }): Promise<SettingsT>;
   testService(service: string): Promise<{ ok: boolean; error?: string }>;
   clearCache(): Promise<{ freed_bytes: number }>;
+  version(): Promise<VersionInfo>;
+  startUpdate(): Promise<void>;
 }

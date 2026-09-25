@@ -114,3 +114,47 @@ def clear_cache():
     freed += _dir_size(samples)
     shutil.rmtree(samples, ignore_errors=True)
     return {"freed_bytes": freed}
+
+
+# --- Mise à jour (installation Windows) -----------------------------------------------
+
+def _updater():
+    """Script créé par l'installateur Windows, à côté du dossier de l'application."""
+    return config.ROOT_DIR.parent / "Mettre-a-jour-Doublr.bat"
+
+
+@router.get("/version")
+def version():
+    import json
+
+    info = {}
+    try:
+        info = json.loads((config.ROOT_DIR / "version.json").read_text(encoding="utf-8-sig"))
+    except Exception:
+        pass
+    return {"sha": info.get("sha") or None, "branch": info.get("branch") or "main",
+            "installed_at": info.get("installed_at"), "can_update": _updater().exists()}
+
+
+class UpdateRequest(BaseModel):
+    confirm: bool  # corps JSON obligatoire : un autre site ne peut pas déclencher la mise à jour (pré-vérification CORS)
+
+
+@router.post("/update")
+def start_update(body: UpdateRequest):
+    """Lance « Mettre à jour Doublr » dans une nouvelle fenêtre, puis arrête ce serveur (fichiers libérés)."""
+    import subprocess
+    import threading
+
+    updater = _updater()
+    if not body.confirm:
+        raise HTTPException(400, "Mise à jour non confirmée.")
+    if not updater.exists():
+        raise HTTPException(404, "Mise à jour automatique disponible uniquement avec l'installateur Windows.")
+    # Le lanceur ne redémarre pas le serveur pendant la mise à jour.
+    (updater.parent / "updating.flag").write_text("1", encoding="ascii")
+    flags = getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0) | getattr(subprocess, "DETACHED_PROCESS", 0)
+    subprocess.Popen(["cmd", "/c", "start", "Mise a jour de Doublr", str(updater)], creationflags=flags,
+                     close_fds=True, cwd=str(updater.parent))
+    threading.Timer(2.0, lambda: os._exit(0)).start()
+    return {"ok": True}

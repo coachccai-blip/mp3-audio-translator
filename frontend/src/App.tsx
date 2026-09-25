@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { Project } from "./api/types";
 import { Banner } from "./components/Feedback";
 import { Icon } from "./components/Icon";
+import { UpdateBanner } from "./components/UpdateNotice";
 import { go, useRoute, type Screen } from "./hooks/useRoute";
 import { useTheme } from "./hooks/useTheme";
 import { useI18n } from "./i18n";
@@ -94,6 +95,7 @@ export default function App() {
             {t("mode.demo.body")}
           </Banner>
         )}
+        {ready && api.mode === "local" && <UpdateBanner />}
         {route.name === "home" && missingKeys.length > 0 && (
           <Banner tone="warning" action={<a className="btn-secondary btn-sm" href="#/settings">{t("banner.goSettings")}</a>}>
             {(missingKeys.includes("LOCAL_LLM") ? t("banner.localLlm") : t("banner.missingKeys", { keys: missingKeys.join(", ") }))}

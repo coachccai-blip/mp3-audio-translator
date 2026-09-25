@@ -79,20 +79,32 @@ export function createHttpApi(base: string): Api {
     watchJob(jid, cb) {
       let closed = false;
       let timer: ReturnType<typeof setTimeout> | undefined;
+      let last: JobSnapshot | null = null;
+      let failures = 0;
+      const finished = (s: JobSnapshot | null) => !!s && ["done", "error", "cancelled"].includes(s.status);
+      const emit = (s: JobSnapshot) => { last = s; cb(s); };
       const poll = async () => {
         if (closed) return;
         try {
           const s = await req<JobSnapshot>(`/api/jobs/${jid}`);
-          cb(s);
-          if (["done", "error", "cancelled"].includes(s.status)) return;
-        } catch { /* réessai */ }
-        timer = setTimeout(poll, 800);
+          failures = 0;
+          emit(s);
+          if (finished(s)) return;
+        } catch (e) {
+          // Serveur arrêté ou traitement perdu : on le dit au lieu d'afficher « En cours » indéfiniment.
+          failures += 1;
+          const lost = e instanceof ApiError && e.status === 404;
+          if (last && (lost || failures === 8)) emit({ ...last, status: "error", eta_s: null, error: lost ? "lost" : "offline" });
+          if (lost) return;
+        }
+        timer = setTimeout(poll, failures ? 2000 : 800);
       };
       let ws: WebSocket | null = null;
       try {
         ws = new WebSocket(url(`/api/ws/jobs/${jid}`).replace(/^http/, "ws"));
-        ws.onmessage = (e) => cb(JSON.parse(e.data));
-        ws.onerror = () => { ws?.close(); ws = null; poll(); };
+        ws.onmessage = (e) => { const s = JSON.parse(e.data); if (s && s.id) emit(s); };
+        // Fermeture (serveur arrêté, réseau) avant la fin : on bascule sur l'interrogation régulière.
+        ws.onclose = () => { ws = null; if (!closed && !finished(last)) poll(); };
       } catch {
         poll();
       }
@@ -115,5 +127,7 @@ export function createHttpApi(base: string): Api {
     putSettings: (body) => req("/api/settings", json("PUT", body)),
     testService: (service) => req(`/api/settings/test/${service}`, { method: "POST" }),
     clearCache: () => req("/api/cache", { method: "DELETE" }),
+    version: () => req("/api/version"),
+    startUpdate: async () => { await req("/api/update", json("POST", { confirm: true })); },
   };
 }

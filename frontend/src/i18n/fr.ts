@@ -46,6 +46,8 @@ const fr = {
   "status.error": "Erreur", "status.skipped": "Ignoré",
   "processing.summary": "Durée respectée à {ms} ms près • {n} segment(s) à vérifier",
   "processing.failed": "Le traitement a échoué", "processing.cancelled": "Traitement annulé",
+  "processing.offline": "Le serveur Doublr ne répond plus. Vérifiez que la fenêtre noire « Doublr » est ouverte (sinon relancez Doublr), puis cliquez sur « Reprendre ».", "processing.lost": "Ce traitement a été interrompu par un redémarrage du serveur. Cliquez sur « Reprendre » : les étapes déjà faites sont conservées.",
+  "update.title": "Mise à jour", "update.available": "Une nouvelle version de Doublr est disponible", "update.body": "Corrections et améliorations. La mise à jour prend quelques minutes ; vos projets, réglages et clés sont conservés.", "update.button": "Mettre à jour Doublr", "update.confirm": "Mettre à jour Doublr maintenant ? Le serveur s'arrête, une fenêtre de mise à jour s'ouvre, puis Doublr redémarre tout seul (quelques minutes). Évitez de lancer la mise à jour pendant un traitement.", "update.startedTitle": "Mise à jour en cours", "update.started": "Suivez la fenêtre « Mise à jour de Doublr ». Doublr se rouvrira tout seul à la fin : rechargez alors cette page.", "update.installed": "Version installée : {v}", "update.upToDate": "à jour",
   "processing.resume": "Reprendre (le cache est conservé)", "processing.toReview": "Réviser", "processing.toExport": "Exporter",
   "review.title": "Révision", "review.original": "Original", "review.dubbed": "Doublé",
   "review.shortcuts": "Espace : lecture/pause · Tab : original/doublé · ←/→ : segment précédent/suivant",

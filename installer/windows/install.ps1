@@ -10,10 +10,13 @@ $Repo   = 'coachccai-blip/mp3-audio-translator'
 $Branch = if ($env:DOUBLR_BRANCH) { $env:DOUBLR_BRANCH } else { 'main' }
 # DOUBLR_NONINTERACTIVE=1 : aucune question (tests automatisés sur GitHub Actions).
 $NonInteractive = $env:DOUBLR_NONINTERACTIVE -eq '1'
+# DOUBLR_UPDATE=1 : mise à jour (bouton de l'application ou menu Démarrer) : pas de question, Doublr se rouvre à la fin.
+$Update = $env:DOUBLR_UPDATE -eq '1'
 $Root   = Join-Path $env:LOCALAPPDATA 'Doublr'
 $App    = Join-Path $Root 'app'
 $Tools  = Join-Path $Root 'tools'
 $Log    = Join-Path $Root 'install.log'
+$Flag   = Join-Path $Root 'updating.flag'   # empêche le lanceur de redémarrer le serveur pendant la mise à jour
 $Total  = 9
 
 New-Item -ItemType Directory -Force -Path $Root, $Tools | Out-Null
@@ -93,9 +96,20 @@ Info "Node.js : $(& (Join-Path $NodeDir 'node.exe') --version)"
 
 # --- 3. Application ---------------------------------------------------------------
 Step 3 "Téléchargement de Doublr ($Branch)"
+# Doublr ouvert : on l'arrête (fichiers libérés pour la mise à jour).
+Set-Content -Path $Flag -Value '1' -Encoding ASCII
+try {
+    Get-CimInstance Win32_Process -Filter "Name='python.exe'" | Where-Object {
+        $_.CommandLine -and ($_.CommandLine -like '*uvicorn app.main:app*' -or $_.CommandLine -like "*$App\.venv*" -or
+                             ($_.ExecutablePath -and $_.ExecutablePath -like "$App\.venv*"))
+    } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
+} catch { }
+# Version exacte installée (le bouton « Mettre à jour » de l'application la compare à GitHub).
+$Sha = $null
+try { $Sha = (Invoke-RestMethod -Uri "https://api.github.com/repos/$Repo/commits/$Branch" -Headers @{ 'User-Agent' = 'Doublr' } -TimeoutSec 20).sha } catch { }
 $zip = Join-Path $env:TEMP 'doublr-src.zip'
 $tmp = Join-Path $env:TEMP 'doublr-src'
-Get-File "https://codeload.github.com/$Repo/zip/refs/heads/$Branch" $zip
+Get-File "https://codeload.github.com/$Repo/zip/$(if ($Sha) { $Sha } else { "refs/heads/$Branch" })" $zip
 if (Test-Path $tmp) { Remove-Item -Recurse -Force $tmp }
 Expand-Archive -Path $zip -DestinationPath $tmp -Force
 $src = Get-ChildItem -Path $tmp -Directory | Select-Object -First 1
@@ -108,6 +122,8 @@ $ErrorActionPreference = 'Continue'
 $code = $LASTEXITCODE
 $ErrorActionPreference = 'Stop'
 if ($code -ge 8) { Fail "Copie des fichiers impossible (robocopy $code)." }
+@{ sha = $Sha; branch = $Branch; installed_at = (Get-Date).ToString('s') } | ConvertTo-Json |
+    Out-File -FilePath (Join-Path $App 'version.json') -Encoding utf8
 Info "Installé dans $App"
 
 # --- 4. Environnement Python + modèles d'IA ------------------------------------------
@@ -169,14 +185,14 @@ $keys = [ordered]@{
     'AZURE_SPEECH_KEY'   = 'Clé Azure Speech (400+ voix premium, gratuit jusqu''à 500 000 caractères/mois)'
     'HF_TOKEN'           = 'Jeton Hugging Face (gratuit : distinguer plusieurs locuteurs)'
 }
-foreach ($k in $(if ($NonInteractive) { @() } else { $keys.Keys })) {
+foreach ($k in $(if ($NonInteractive -or $Update) { @() } else { $keys.Keys })) {
     $current = Get-EnvValue $k
     $label = $keys[$k]
     if ($current) { $label += ' [déjà renseignée, Entrée pour garder]' }
     $v = Read-Host "      $label"
     if ($v) { Set-EnvValue $k $v.Trim() }
 }
-if (-not $NonInteractive -and (Get-EnvValue 'AZURE_SPEECH_KEY')) {
+if (-not $NonInteractive -and -not $Update -and (Get-EnvValue 'AZURE_SPEECH_KEY')) {
     $region = Read-Host "      Région Azure [$(if (Get-EnvValue 'AZURE_SPEECH_REGION') { Get-EnvValue 'AZURE_SPEECH_REGION' } else { 'westeurope' })]"
     if ($region) { Set-EnvValue 'AZURE_SPEECH_REGION' $region.Trim() }
 }
@@ -224,6 +240,7 @@ $Launcher = Join-Path $Root 'Doublr.bat'
     '@echo off',
     'title Doublr',
     'set PYTHONUTF8=1',
+    "del `"$Flag`" 2>nul",
     "set OLLAMA_MODELS=$OllamaModels",
     'set OLLAMA_KEEP_ALIVE=30m',
     'set OLLAMA_FLASH_ATTENTION=1',
@@ -234,13 +251,20 @@ $Launcher = Join-Path $Root 'Doublr.bat'
     'echo   Pour arreter Doublr, fermez cette fenetre.',
     'echo.',
     'start "" /min powershell -NoProfile -WindowStyle Hidden -Command "Start-Sleep 6; Start-Process ''http://localhost:8000''"',
+    ':serveur',
     "`"$VPy`" -m uvicorn app.main:app --host 127.0.0.1 --port 8000",
-    'pause'
+    "if exist `"$Flag`" exit",
+    'echo.',
+    'echo   Le serveur Doublr s''est arrete : redemarrage automatique dans 3 secondes...',
+    'echo   (fermez cette fenetre pour arreter Doublr)',
+    'timeout /t 3 /nobreak >nul',
+    'goto serveur'
 ) | Set-Content -Path $Launcher -Encoding ASCII
 $Updater = Join-Path $Root 'Mettre-a-jour-Doublr.bat'
 @(
     '@echo off',
     'title Mise a jour de Doublr',
+    'set DOUBLR_UPDATE=1',
     "powershell -NoProfile -ExecutionPolicy Bypass -Command `"iex (irm 'https://raw.githubusercontent.com/$Repo/$Branch/installer/windows/install.ps1')`""
 ) | Set-Content -Path $Updater -Encoding ASCII
 
@@ -264,7 +288,11 @@ Write-Host ''
 Write-Host '  Installation terminée !' -ForegroundColor Cyan
 Write-Host '  Double-cliquez sur « Doublr » sur votre Bureau : Doublr s''ouvrira dans votre navigateur.'
 Write-Host ''
-if (-not $NonInteractive) {
+Remove-Item -Path $Flag -Force -ErrorAction SilentlyContinue
+if ($Update -and -not $NonInteractive) {
+    Write-Host '  Mise à jour terminée : Doublr redémarre.' -ForegroundColor Cyan
+    Start-Process -FilePath $Launcher
+} elseif (-not $NonInteractive) {
     $go = Read-Host '  Lancer Doublr maintenant ? (O/n)'
     if ($go -ne 'n' -and $go -ne 'N') { Start-Process -FilePath $Launcher }
 }

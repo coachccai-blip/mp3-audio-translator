@@ -41,6 +41,8 @@ const pl: Dict = {
   "step.translate": "Tłumaczenie", "step.synthesize": "Generowanie głosów", "step.assemble": "Montaż",
   "status.pending": "Do zrobienia", "status.running": "W toku", "status.done": "Gotowe", "status.error": "Błąd", "status.skipped": "Pominięto",
   "processing.summary": "Czas trwania zachowany z dokładnością do {ms} ms • segmenty do sprawdzenia: {n}", "processing.failed": "Przetwarzanie nie powiodło się",
+  "processing.offline": "Serwer Doublr nie odpowiada. Sprawdź, czy czarne okno „Doublr” jest otwarte (w przeciwnym razie uruchom Doublr ponownie), a następnie kliknij „Wznów”.", "processing.lost": "Przetwarzanie zostało przerwane przez ponowne uruchomienie serwera. Kliknij „Wznów”: ukończone kroki zostają zachowane.",
+  "update.title": "Aktualizacja", "update.available": "Dostępna jest nowa wersja Doublr", "update.body": "Poprawki i ulepszenia. Aktualizacja trwa kilka minut; projekty, ustawienia i klucze zostają zachowane.", "update.button": "Zaktualizuj Doublr", "update.confirm": "Zaktualizować Doublr teraz? Serwer zostanie zatrzymany, otworzy się okno aktualizacji, a potem Doublr uruchomi się ponownie sam (kilka minut). Nie aktualizuj w trakcie przetwarzania.", "update.startedTitle": "Trwa aktualizacja", "update.started": "Śledź okno „Mise à jour de Doublr”. Po zakończeniu Doublr otworzy się sam: wtedy odśwież tę stronę.", "update.installed": "Zainstalowana wersja: {v}", "update.upToDate": "aktualna",
   "processing.cancelled": "Przetwarzanie anulowane", "processing.resume": "Wznów (pamięć podręczna zachowana)",
   "processing.toReview": "Weryfikuj", "processing.toExport": "Eksportuj",
   "review.title": "Weryfikacja", "review.original": "Oryginał", "review.dubbed": "Dubbing",
