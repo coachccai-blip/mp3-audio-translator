@@ -101,12 +101,25 @@ def whisper_available() -> bool:
 def _model(name: str, device: str):
     from faster_whisper import WhisperModel
 
+    def make(**kw):
+        try:  # modèle déjà téléchargé : pas de requête réseau
+            return WhisperModel(name, local_files_only=True, **kw)
+        except Exception:
+            return WhisperModel(name, **kw)
+
     if device in ("cuda", "auto"):
         try:
-            return WhisperModel(name, device="cuda", compute_type="float16")
+            return make(device="cuda", compute_type="float16")
         except Exception:  # pas de GPU NVIDIA / bibliothèques CUDA absentes → CPU
             pass
-    return WhisperModel(name, device="cpu", compute_type="int8")
+    return make(device="cpu", compute_type="int8")
+
+
+def _on_gpu(model) -> bool:
+    try:
+        return model.model.device == "cuda"
+    except Exception:
+        return False
 
 
 def transcribe(path: Path, model_name: str = "large-v3", device: str = "auto", language: str | None = None,
@@ -114,7 +127,18 @@ def transcribe(path: Path, model_name: str = "large-v3", device: str = "auto", l
     if not whisper_available():
         raise TranscriptionUnavailable("faster-whisper n'est pas installé (pip install -e \".[ai]\").")
     model = _model(model_name, device)
-    segments, info = model.transcribe(str(path), language=language, word_timestamps=True, vad_filter=True)
+    segments = info = None
+    if _on_gpu(model):
+        # Par lots sur carte graphique uniquement : mesuré 6 fois PLUS LENT sur processeur (CI Windows, 4 cœurs).
+        try:
+            from faster_whisper import BatchedInferencePipeline
+
+            segments, info = BatchedInferencePipeline(model=model).transcribe(
+                str(path), language=language, word_timestamps=True, batch_size=16)
+        except Exception:
+            segments = None
+    if segments is None:
+        segments, info = model.transcribe(str(path), language=language, word_timestamps=True, vad_filter=True)
     words: list[Word] = []
     for seg in segments:
         for w in seg.words or []:

@@ -1,4 +1,6 @@
-"""Calibre le débit (syllabes ou caractères par seconde) de chaque locale sur le TTS réel (brief §7.2).
+"""(Voir aussi config/voice_rates.json : débit mesuré par voix, utilisé en priorité par le pipeline.)
+
+Calibre le débit (syllabes ou caractères par seconde) de chaque locale sur le TTS réel (brief §7.2).
 
     python scripts/calibrate_rate.py [--write]
 

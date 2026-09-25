@@ -53,6 +53,7 @@ class TranslationRequest:
     next: list[str] = field(default_factory=list)
     glossary: list[tuple[str, str]] = field(default_factory=list)  # (source, cible ou "" = ne pas traduire)
     previous: Attempt | None = None
+    target_units: int | None = None  # longueur idéale, calculée sur le débit réel de la voix choisie
 
 
 @dataclass
@@ -69,7 +70,11 @@ class DocumentAnalysis:
 
 class Translator(Protocol):
     def translate(self, req: TranslationRequest) -> TranslationResult: ...
+    def translate_many(self, reqs: list[TranslationRequest]) -> list[TranslationResult | None]: ...
     def analyze_document(self, text: str, source_lang: str, target_locale: str) -> DocumentAnalysis: ...
+
+
+BATCH_SIZE = 12  # lignes par appel : assez pour le contexte, assez peu pour un JSON fiable avec un petit modèle
 
 
 # --- Prompts (§7.3) ---------------------------------------------------------
@@ -121,6 +126,82 @@ def build_user_prompt(req: TranslationRequest) -> str:
             f"{direction} it by about {pct:.0f}% while keeping it natural and faithful."
         )
     return "\n\n".join(parts)
+
+
+def _unit_word(req: TranslationRequest) -> str:
+    return "characters" if req.count_unit == "characters" else "syllables"
+
+
+def build_batch_system_prompt(req: TranslationRequest) -> str:
+    """Consignes communes à un lot de lignes (même langue, registre, glossaire)."""
+    base = build_system_prompt(req).split("\n\nRespond with strict JSON only")[0]
+    return base + (
+        "\n\nYou receive numbered lines of one continuous recording. Translate each line separately "
+        "(never merge or split lines), keeping the flow natural across lines.\n"
+        f"Each line has a spoken time window and a {_unit_word(req)} budget: aim close to the target, "
+        "never above the maximum. Count carefully; rephrase rather than cram.\n"
+        'Respond with strict JSON only: {"items": [{"id": <line number>, "translation": "..."}]}'
+    )
+
+
+def build_batch_user_prompt(reqs: list[TranslationRequest], before: list[str], after: list[str]) -> str:
+    unit = _unit_word(reqs[0])
+    parts = []
+    if before:
+        parts.append("Previous lines (context, do not translate):\n" + "\n".join(f"- {t}" for t in before[-2:]))
+    lines = []
+    for i, r in enumerate(reqs, 1):
+        target = r.target_units or r.max_units
+        line = f"[{i}] ({r.target_seconds:.1f} s, target ~{target} {unit}, max {r.max_units}) {r.text}"
+        if r.previous:
+            p = r.previous
+            have = count_units(p.text, r.target_locale)
+            delta = have - target
+            verb = f"REMOVE about {delta}" if delta > 0 else f"ADD about {-delta}"
+            line += (f"\n    previous translation ({have} {unit}, lasted {p.actual_seconds:.1f} s instead of "
+                     f"{r.target_seconds:.1f} s): {p.text}\n    rewrite it with ~{target} {unit}: {verb} {unit}, "
+                     "keeping the meaning (drop filler words, use shorter synonyms)" if delta > 0 else
+                     f"\n    previous translation ({have} {unit}, lasted {p.actual_seconds:.1f} s instead of "
+                     f"{r.target_seconds:.1f} s): {p.text}\n    rewrite it with ~{target} {unit}: {verb} {unit}, "
+                     "keeping the meaning (no new information)")
+        lines.append(line)
+    parts.append("Lines to translate:\n" + "\n".join(lines))
+    if after:
+        parts.append("Next lines (context, do not translate):\n" + "\n".join(f"- {t}" for t in after[:2]))
+    return "\n\n".join(parts)
+
+
+class _Item(BaseModel):
+    id: int
+    translation: str
+
+
+class _BatchOut(BaseModel):
+    items: list[_Item]
+
+
+def translate_in_batches(translator, reqs: list[TranslationRequest], call) -> list[TranslationResult | None]:
+    """Découpe en lots, appelle `call(system, user, n)` → _BatchOut ; repli ligne par ligne sur les manques."""
+    out: list[TranslationResult | None] = [None] * len(reqs)
+    for start in range(0, len(reqs), BATCH_SIZE):
+        chunk = reqs[start: start + BATCH_SIZE]
+        before = chunk[0].prev
+        after = chunk[-1].next
+        try:
+            res = call(build_batch_system_prompt(chunk[0]), build_batch_user_prompt(chunk, before, after), len(chunk))
+            for item in res.items:
+                if 1 <= item.id <= len(chunk) and item.translation.strip():
+                    text = item.translation.strip().strip('"«»').strip()
+                    out[start + item.id - 1] = TranslationResult(text, count_units(text, chunk[0].target_locale))
+        except TranslationError:
+            pass
+        for k in range(start, start + len(chunk)):
+            if out[k] is None:  # ligne oubliée par le modèle : traduction individuelle
+                try:
+                    out[k] = translator.translate(reqs[k])
+                except TranslationError:
+                    out[k] = None
+    return out
 
 
 # --- Implémentation Claude ---------------------------------------------------
@@ -183,6 +264,9 @@ class ClaudeTranslator:
         text = out.translation.strip()
         return TranslationResult(text=text, estimated_units=count_units(text, req.target_locale))
 
+    def translate_many(self, reqs: list[TranslationRequest]) -> list[TranslationResult | None]:
+        return translate_in_batches(self, reqs, lambda sys_p, user, n: self._parse(sys_p, user, _BatchOut, 400 + 250 * n))
+
     def analyze_document(self, text: str, source_lang: str, target_locale: str) -> DocumentAnalysis:
         target = LANG_NAMES.get(target_locale.split("-")[0], target_locale)
         system = (
@@ -218,6 +302,10 @@ class EchoTranslator:
         text = " ".join(words)
         return TranslationResult(text=text, estimated_units=count_units(text, req.target_locale))
 
+    def translate_many(self, reqs: list[TranslationRequest]) -> list[TranslationResult | None]:
+        self.batch_calls = getattr(self, "batch_calls", 0) + 1
+        return [self.translate(r) for r in reqs]
+
     def analyze_document(self, text, source_lang, target_locale) -> DocumentAnalysis:
         return DocumentAnalysis(register="conversational", terms=[])
 
@@ -246,12 +334,13 @@ class OllamaTranslator:
         self.input_tokens = 0
         self.output_tokens = 0
 
-    def _chat(self, system: str, user: str, schema: type[BaseModel]):
+    def _chat(self, system: str, user: str, schema: type[BaseModel], num_predict: int = 512):
         import httpx
 
         body = {
             "model": self.model, "stream": False, "format": schema.model_json_schema(),
-            "options": {"temperature": 0.2},
+            "keep_alive": "30m",  # garde le modèle en mémoire entre les appels (évite ~10-30 s de rechargement)
+            "options": {"temperature": 0.2, "num_ctx": 8192, "num_predict": num_predict},
             "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
         }
         try:
@@ -279,14 +368,31 @@ class OllamaTranslator:
             raise TranslationError("Traduction vide.")
         return TranslationResult(text=text, estimated_units=count_units(text, req.target_locale))
 
+    def translate_many(self, reqs: list[TranslationRequest]) -> list[TranslationResult | None]:
+        return translate_in_batches(self, reqs, lambda sys_p, user, n: self._chat(sys_p, user, _BatchOut, 120 + 90 * n))
+
+    def warm_up(self) -> None:
+        """Charge le modèle en mémoire en arrière-plan (pendant la transcription) pour gagner ~10-30 s."""
+        import httpx
+
+        try:
+            httpx.post(f"{self.url}/api/generate", json={"model": self.model, "keep_alive": "30m"}, timeout=120)
+        except Exception:
+            pass
+
     def analyze_document(self, text: str, source_lang: str, target_locale: str) -> DocumentAnalysis:
+        # Sur processeur, cette analyse coûte autant qu'une traduction : le modèle local déduit le registre
+        # du contexte, et les lots donnent la cohérence des termes (le glossaire utilisateur reste appliqué).
+        return DocumentAnalysis(register="auto (infer it from the lines)", terms=[])
+
+    def _analyze_document_full(self, text: str, source_lang: str, target_locale: str) -> DocumentAnalysis:
         target = LANG_NAMES.get(target_locale.split("-")[0], target_locale)
         system = (
             "You prepare a transcript for dubbing. Give its speech_register (one of: formal, conversational, "
             f"advertising, educational) and up to 20 recurring proper nouns or key terms with their {target} "
             "translation (empty target = keep untranslated). Respond with JSON only."
         )
-        out = self._chat(system, text[:12000], _DocOut)
+        out = self._chat(system, text[:12000], _DocOut, 1024)
         register = out.speech_register if out.speech_register in REGISTERS else "conversational"
         return DocumentAnalysis(register=register, terms=[(t.source, t.target) for t in out.terms])
 
