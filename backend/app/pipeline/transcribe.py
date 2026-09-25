@@ -99,8 +99,6 @@ def whisper_available() -> bool:
 
 @lru_cache(maxsize=2)
 def _model(name: str, device: str):
-    import os
-
     from faster_whisper import WhisperModel
 
     if device in ("cuda", "auto"):
@@ -108,7 +106,7 @@ def _model(name: str, device: str):
             return WhisperModel(name, device="cuda", compute_type="float16")
         except Exception:  # pas de GPU NVIDIA / bibliothèques CUDA absentes → CPU
             pass
-    return WhisperModel(name, device="cpu", compute_type="int8", cpu_threads=os.cpu_count() or 4)
+    return WhisperModel(name, device="cpu", compute_type="int8")
 
 
 def _on_gpu(model) -> bool:
@@ -123,14 +121,17 @@ def transcribe(path: Path, model_name: str = "large-v3-turbo", device: str = "au
     if not whisper_available():
         raise TranscriptionUnavailable("faster-whisper n'est pas installé (pip install -e \".[ai]\").")
     model = _model(model_name, device)
-    try:
-        # Transcription par lots (plusieurs morceaux décodés ensemble) : nettement plus rapide.
-        from faster_whisper import BatchedInferencePipeline
+    segments = info = None
+    if _on_gpu(model):
+        # Par lots sur carte graphique uniquement : mesuré 6 fois PLUS LENT sur processeur (CI Windows, 4 cœurs).
+        try:
+            from faster_whisper import BatchedInferencePipeline
 
-        batched = BatchedInferencePipeline(model=model)
-        segments, info = batched.transcribe(str(path), language=language, word_timestamps=True,
-                                            batch_size=16 if _on_gpu(model) else 8)
-    except Exception:
+            segments, info = BatchedInferencePipeline(model=model).transcribe(
+                str(path), language=language, word_timestamps=True, batch_size=16)
+        except Exception:
+            segments = None
+    if segments is None:
         segments, info = model.transcribe(str(path), language=language, word_timestamps=True, vad_filter=True)
     words: list[Word] = []
     for seg in segments:

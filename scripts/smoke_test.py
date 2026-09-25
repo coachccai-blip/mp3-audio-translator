@@ -74,7 +74,7 @@ def main() -> int:
     t0 = time.time()
     ts = time.time()
     ctx = runner.Ctx(on_step=lambda k, s, d=None: print(f"  {time.time() - ts:7.1f}s  {k:<11} {s} {d or ''}", flush=True),
-                     on_log=print)
+                     on_log=lambda m: print(m, flush=True))
     runner.prepare_file(ctx, f, project)
     units = runner.load_transcript(f)
     print(f"Langue détectée : {project.source_lang} — {len(units)} segment(s) en {time.time() - t0:.0f} s")
