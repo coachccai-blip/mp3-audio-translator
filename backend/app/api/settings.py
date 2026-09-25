@@ -53,6 +53,7 @@ def get_settings_route():
 class SettingsBody(BaseModel):
     keys: dict[str, str] | None = None
     values: dict[str, str] | None = None
+    remove_keys: list[str] | None = None   # « Déconnecter » : efface la clé du fichier .env
 
 
 @router.put("/settings")
@@ -64,8 +65,13 @@ def put_settings(body: SettingsBody):
     for k, v in (body.values or {}).items():
         if k in EDITABLE:
             updates[k] = str(v)
+    removed = [k for k in (body.remove_keys or []) if k in SECRET_KEYS]
+    for k in removed:
+        updates[k] = ""
     if updates:
         write_env_values(updates)
+        for k in removed:
+            os.environ.pop(k, None)
         config.reload_settings()
         engines.set_engines(None)
         get_catalog.cache_clear()

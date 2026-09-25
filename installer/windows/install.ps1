@@ -140,6 +140,16 @@ Info 'Téléchargement de PyTorch (plusieurs minutes)…'
 Invoke-Logged $VPy @('-m', 'pip', 'install', 'torch==2.5.1', 'torchaudio==2.5.1', '--index-url', $TorchIndex) 'L''installation de PyTorch'
 Info 'Installation de Doublr et de ses dépendances…'
 Invoke-Logged $VPy @('-m', 'pip', 'install', '-e', "$(Join-Path $App 'backend')[ai]", 'reportlab') 'L''installation des dépendances'
+if ($Gpu) {
+    # Whisper (CTranslate2) n'embarque pas les bibliothèques NVIDIA : sans elles, il tourne sur le processeur (très lent).
+    Info 'Bibliothèques NVIDIA pour Whisper sur carte graphique (cuBLAS, cuDNN ≈ 1 Go)…'
+    $prev = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'   # facultatif : en cas d'échec, Whisper utilise le processeur
+    & $VPy -m pip install 'nvidia-cuda-runtime-cu12>=12.4,<13' 'nvidia-cublas-cu12>=12.4,<13' 'nvidia-cudnn-cu12>=9.2,<10' 2>&1 |
+        Out-File -FilePath $Log -Append -Encoding utf8
+    if ($LASTEXITCODE -ne 0) { Info 'Attention : bibliothèques NVIDIA non installées, Whisper utilisera le processeur (plus lent).' }
+    $ErrorActionPreference = $prev
+}
 
 # --- 5. Interface -------------------------------------------------------------------
 Step 5 'Construction de l''interface'

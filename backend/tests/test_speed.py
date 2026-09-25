@@ -108,3 +108,28 @@ def test_job_interrupted_by_server_restart_is_reported(app_env):
     assert snap["status"] == "error" and snap["error"] == INTERRUPTED
     assert client.get("/api/projects/p1/job").json()["id"] == "stale"
     assert client.post("/api/jobs/stale/cancel").json()["status"] == "error"
+
+
+def test_transcription_progress_is_streamed(monkeypatch):
+    """Texte reconnu et secondes traitées remontent pendant la transcription (plus de « En cours » muet)."""
+    import json
+    import time
+
+    from app.pipeline import transcribe as T
+    from app.pipeline import worker
+
+    def fake_run(function, path, model, language, progress_path, device, pool):
+        with open(progress_path, "w", encoding="utf-8") as fh:
+            for i, text in enumerate(["Bonjour.", "Au revoir."], 1):
+                fh.write(json.dumps({"text": text, "end": 30.0 * i, "duration": 60.0}) + "\n")
+                fh.flush()
+                time.sleep(1.2)
+        return T.Transcript(language="fr", language_probability=1.0, units=[], device="cuda")
+
+    monkeypatch.setattr(T, "whisper_available", lambda: True)
+    monkeypatch.setattr(worker, "run_on_device", fake_run)
+    texts, progress = [], []
+    tr = T.transcribe(Path("x.wav"), on_unit=texts.append, on_progress=lambda d, t: progress.append((d, t)))
+    assert texts == ["Bonjour.", "Au revoir."]
+    assert progress == [(30.0, 60.0), (60.0, 60.0)]
+    assert tr.device == "cuda"

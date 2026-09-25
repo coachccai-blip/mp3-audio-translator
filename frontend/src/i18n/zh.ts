@@ -43,6 +43,7 @@ const zh: Dict = {
   "processing.summary": "时长误差在 {ms} 毫秒以内 • {n} 个片段待检查", "processing.failed": "处理失败",
   "processing.offline": "Doublr 服务器没有响应。请确认黑色的“Doublr”窗口仍然打开（否则请重新启动 Doublr），然后点击“继续”。", "processing.lost": "服务器重启中断了此处理。请点击“继续”：已完成的步骤会保留。",
   "update.title": "更新", "update.available": "Doublr 有新版本可用", "update.body": "包含修复和改进。更新需要几分钟；您的项目、设置和密钥都会保留。", "update.button": "更新 Doublr", "update.confirm": "现在更新 Doublr 吗？服务器会停止，随后打开更新窗口，完成后 Doublr 会自动重新启动（几分钟）。请不要在处理进行中时更新。", "update.startedTitle": "正在更新", "update.started": "请查看“Mise à jour de Doublr”窗口。完成后 Doublr 会自动重新打开，届时请刷新此页面。", "update.installed": "已安装版本：{v}", "update.upToDate": "已是最新",
+  "claude.title": "使用 Claude 的高级翻译。", "claude.pitch": "更自然、更忠实，中文、波兰语和瑞典语尤其明显。按用量付费（每个文件几美分）。", "claude.button": "连接 Claude", "claude.step1": "登录您的 Anthropic 账户并创建 API 密钥：", "claude.openConsole": "打开 Anthropic 控制台", "claude.step2": "复制密钥（以 sk-ant- 开头）并粘贴到下方。", "claude.note": "Claude Pro 和 Max 订阅无法被其他应用使用：翻译通过 Anthropic API 进行，按用量单独计费。密钥只保存在您的电脑上。", "claude.keyLabel": "Anthropic API 密钥", "claude.connect": "连接", "claude.testing": "正在验证…", "claude.connected": "Claude 已连接：之后的翻译将使用 Claude。", "claude.invalid": "Anthropic 拒绝了此密钥：{e}", "claude.active": "已启用 Claude 高级翻译。", "claude.disconnect": "断开连接", "claude.disconnected": "已断开 Claude：重新使用您电脑上的免费翻译。",
   "processing.cancelled": "处理已取消", "processing.resume": "继续（保留缓存）",
   "processing.toReview": "审阅", "processing.toExport": "导出",
   "review.title": "审阅", "review.original": "原声", "review.dubbed": "配音",

@@ -66,7 +66,7 @@ def app_env(tmp_path, monkeypatch, samples_dir):
         (out / "name.txt").write_text(name)
         return Separation(out / "vocals.wav", out / "background.wav", "test")
 
-    def transcribe(path: Path, language=None, on_unit=None, model=None):
+    def transcribe(path: Path, language=None, on_unit=None, model=None, on_progress=None):
         name = (Path(path).parent / "name.txt").read_text()
         d = json.loads((samples_dir / f"{name}.json").read_text())
         units = [Unit(start=u["start"], end=u["end"], text=u["text"], speaker=u["speaker"]) for u in d["units"]]

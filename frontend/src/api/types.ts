@@ -111,7 +111,7 @@ export interface Api {
   exportProject(pid: string, body: ExportBody): Promise<ExportResult>;
   exportFileUrl(eid: string, name: string): string;
   getSettings(): Promise<SettingsT>;
-  putSettings(body: { keys?: Record<string, string>; values?: Record<string, string> }): Promise<SettingsT>;
+  putSettings(body: { keys?: Record<string, string>; values?: Record<string, string>; remove_keys?: string[] }): Promise<SettingsT>;
   testService(service: string): Promise<{ ok: boolean; error?: string }>;
   clearCache(): Promise<{ freed_bytes: number }>;
   version(): Promise<VersionInfo>;

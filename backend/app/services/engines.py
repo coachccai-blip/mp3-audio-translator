@@ -36,8 +36,8 @@ def default_engines() -> Engines:
     s = get_settings()
     return Engines(
         separate=lambda src, out: separate_mod.separate(src, out, s.device),
-        transcribe=lambda path, language=None, on_unit=None, model=None: transcribe_mod.transcribe(
-            path, model or s.whisper_model, s.device, language, on_unit),
+        transcribe=lambda path, language=None, on_unit=None, model=None, on_progress=None: transcribe_mod.transcribe(
+            path, model or s.whisper_model, s.device, language, on_unit, on_progress),
         diarize=lambda path: diarize_mod.diarize(path, s.device),
         detect_language=lambda path: transcribe_mod.detect_language(path, s.whisper_model, s.device),
         translator=make_translator,

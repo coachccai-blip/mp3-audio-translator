@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { Project } from "../api/types";
+import { ClaudeConnect } from "../components/ClaudeConnect";
 import { DropZone } from "../components/DropZone";
 import { useToast } from "../components/Feedback";
 import { FileRow } from "../components/FileRow";
@@ -35,6 +36,7 @@ export function ImportPage() {
     <div className="space-y-10">
       {!project && <p className="max-w-2xl text-lg text-muted">{t("import.tagline")}</p>}
       <DropZone onFiles={add} compact={Boolean(project)} />
+      {!project && <ClaudeConnect />}
       {busy && <p className="flex items-center gap-2 text-sm text-muted" role="status"><Icon name="refresh" className="animate-spin" size={16} />{t("import.analyzing")}</p>}
 
       {project && project.files.length > 0 && (

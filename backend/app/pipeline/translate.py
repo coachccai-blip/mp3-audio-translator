@@ -237,6 +237,8 @@ class ClaudeTranslator:
     def _parse(self, system: str, user: str, schema: type[BaseModel], max_tokens: int = 4000):
         import anthropic
 
+        # La réflexion (active par défaut) consomme aussi des jetons de sortie : marge large pour ne pas tronquer.
+        max_tokens = max(max_tokens, 16000)
         try:
             resp = self.client.messages.parse(
                 model=self.model, max_tokens=max_tokens, system=system,
@@ -253,6 +255,8 @@ class ClaudeTranslator:
         if usage:
             self.input_tokens += usage.input_tokens
             self.output_tokens += usage.output_tokens
+        if resp.stop_reason == "max_tokens":
+            raise TranslationError("Réponse de traduction tronquée (limite de longueur atteinte).")
         if resp.stop_reason == "refusal":
             raise TranslationError("Traduction refusée par le modèle pour ce segment.")
         if resp.parsed_output is None:
