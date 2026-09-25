@@ -19,6 +19,21 @@ export function ImportPage() {
 
   useEffect(() => { api.listProjects().then(setRecent).catch(() => setRecent([])); }, [api]);
 
+  const removeProject = async (p: Project) => {
+    if (!window.confirm(t("import.deleteConfirm", { name: p.name }))) return;
+    try { await api.deleteProject(p.id); setRecent((r) => r.filter((x) => x.id !== p.id)); }
+    catch (e) { toast({ tone: "danger", text: errMsg(e) }); }
+  };
+  const removeAll = async () => {
+    if (!window.confirm(t("import.deleteAllConfirm", { n: recent.length }))) return;
+    const failed: Project[] = [];
+    for (const p of recent) {
+      try { await api.deleteProject(p.id); } catch { failed.push(p); }
+    }
+    setRecent(failed);
+    if (failed.length) toast({ tone: "danger", text: t("import.deleteFailed", { n: failed.length }) });
+  };
+
   const add = async (files: File[]) => {
     if (!files.length) return;
     setBusy(true);
@@ -56,7 +71,12 @@ export function ImportPage() {
       )}
 
       <section aria-labelledby="recent-h" className="space-y-3">
-        <h2 id="recent-h" className="text-sm font-semibold uppercase tracking-wide text-muted">{t("import.recent")}</h2>
+        <div className="flex items-center justify-between gap-2">
+          <h2 id="recent-h" className="text-sm font-semibold uppercase tracking-wide text-muted">{t("import.recent")}</h2>
+          {recent.length > 1 && (
+            <button className="btn-ghost btn-sm text-danger" onClick={removeAll}><Icon name="trash" size={16} />{t("import.deleteAll")}</button>
+          )}
+        </div>
         {recent.length === 0 ? (
           <p className="text-sm text-muted">{t("import.noRecent")}</p>
         ) : (
@@ -76,6 +96,8 @@ export function ImportPage() {
                 <div className="mt-auto flex gap-2">
                   <button className="btn-secondary btn-sm" onClick={() => go(`/p/${p.id}/${p.status === "done" ? "review" : "configure"}`)}>{t("common.open")}</button>
                   {p.status === "done" && <button className="btn-ghost btn-sm" onClick={() => go(`/p/${p.id}/export`)}>{t("import.reexport")}</button>}
+                  <button className="btn-ghost btn-sm ml-auto" onClick={() => removeProject(p)} aria-label={t("import.deleteNamed", { name: p.name })}
+                    title={t("import.delete")}><Icon name="trash" size={16} /></button>
                 </div>
               </li>
             ))}

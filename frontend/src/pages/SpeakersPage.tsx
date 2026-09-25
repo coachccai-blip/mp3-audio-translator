@@ -7,7 +7,7 @@ import { VoiceCard } from "../components/VoiceCard";
 import { fmtDuration, speakerColor } from "../format";
 import { go } from "../hooks/useRoute";
 import { useI18n } from "../i18n";
-import { errMsg, useApp } from "../store";
+import { errMsg, missingText, useApp } from "../store";
 
 export function SpeakersPage({ project, reload }: { project: Project; reload: () => void }) {
   const { t } = useI18n();
@@ -29,7 +29,7 @@ export function SpeakersPage({ project, reload }: { project: Project; reload: ()
 
   const launch = async () => {
     if (missingKeys.length) {
-      toast({ tone: "danger", text: (missingKeys.includes("LOCAL_LLM") ? t("banner.localLlm") : t("banner.missingKeys", { keys: missingKeys.join(", ") })), action: { label: t("banner.goSettings"), run: () => go("/settings") } });
+      toast({ tone: "danger", text: missingText(t, missingKeys), action: { label: t("banner.goSettings"), run: () => go("/settings") } });
       return;
     }
     try { await api.run(project.id); go(`/p/${project.id}/processing`); } catch (e) { toast({ tone: "danger", text: errMsg(e) }); }

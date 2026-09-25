@@ -401,10 +401,96 @@ class OllamaTranslator:
         return DocumentAnalysis(register=register, terms=[(t.source, t.target) for t in out.terms])
 
 
+def claude_code_path() -> str | None:
+    """Claude Code (outil officiel d'Anthropic) installé sur ce PC, connecté au compte Claude de l'utilisateur."""
+    import shutil
+    from pathlib import Path
+
+    found = shutil.which("claude")
+    if found:
+        return found
+    home = Path.home()
+    for c in (home / ".local" / "bin" / "claude.exe", home / ".local" / "bin" / "claude",
+              Path(os.environ.get("APPDATA", "")) / "npm" / "claude.cmd"):
+        if str(c) and c.exists():
+            return str(c)
+    return None
+
+
+NOT_LOGGED_IN = ("Claude n'est pas connecté à votre compte : sur l'accueil de Doublr, cliquez sur "
+                 "« Se connecter à mon compte Claude ».")
+
+
+def run_claude_code(prompt: str, timeout: float = 600) -> str:
+    """Envoie un message à Claude Code en mode non interactif (`claude -p`) et renvoie sa réponse texte.
+
+    Utilise l'abonnement Claude (Pro, Max…) de la personne connectée dans Claude Code : pas de clé API.
+    """
+    import subprocess
+    import tempfile
+
+    exe = claude_code_path()
+    if not exe:
+        raise TranslationError("Claude Code n'est pas installé : sur l'accueil de Doublr, cliquez sur "
+                               "« Se connecter à mon compte Claude ».")
+    # Sans clé API dans l'environnement : Claude Code utilise alors le compte Claude connecté.
+    env = {k: v for k, v in os.environ.items() if k not in ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN")}
+    with tempfile.TemporaryDirectory(prefix="doublr-claude-") as cwd:  # dossier vide : rien à lire ni modifier
+        try:
+            proc = subprocess.run([exe, "-p", "--output-format", "json"], input=prompt, capture_output=True,
+                                  text=True, encoding="utf-8", errors="replace", timeout=timeout, cwd=cwd, env=env,
+                                  creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+        except subprocess.TimeoutExpired as exc:
+            raise TranslationError("Claude Code ne répond pas (délai dépassé).") from exc
+    try:
+        out = json.loads(proc.stdout)
+    except ValueError:
+        out = None
+    if not isinstance(out, dict):
+        detail = (proc.stderr or proc.stdout or "").strip()[-300:]
+        if "login" in detail.lower() or "log in" in detail.lower() or "auth" in detail.lower():
+            raise TranslationError(NOT_LOGGED_IN)
+        raise TranslationError(f"Claude Code a échoué : {detail or f'code {proc.returncode}'}")
+    result = str(out.get("result") or "")
+    if out.get("is_error") or proc.returncode != 0:
+        low = result.lower()
+        if "login" in low or "api key" in low or "authenticat" in low:
+            raise TranslationError(NOT_LOGGED_IN)
+        raise TranslationError(f"Claude Code : {result[:300] or 'erreur inconnue'}")
+    return result
+
+
+class ClaudeCodeTranslator(ClaudeTranslator):
+    """Traduction par Claude avec le compte Claude de l'utilisateur, via Claude Code installé localement."""
+
+    def __init__(self):
+        self.model = "claude-code"
+        self.client = None
+        self.input_tokens = 0
+        self.output_tokens = 0
+
+    def _parse(self, system: str, user: str, schema: type[BaseModel], max_tokens: int = 4000):
+        prompt = (f"{system}\n\nRespond with ONLY one JSON object (no markdown fence, no commentary, no tool use) "
+                  f"that validates against this JSON Schema:\n{json.dumps(schema.model_json_schema())}\n\n{user}")
+        last = ""
+        for _ in range(2):  # une seconde chance si la réponse n'est pas du JSON valide
+            text = run_claude_code(prompt)
+            start, end = text.find("{"), text.rfind("}")
+            if start != -1 and end > start:
+                try:
+                    return schema.model_validate_json(text[start: end + 1])
+                except ValueError as exc:
+                    last = str(exc)[:200]
+        raise TranslationError(f"Réponse de traduction invalide ({last or 'pas de JSON'}).")
+
+
 def make_translator() -> Translator:
-    """Traducteur selon les réglages : Claude si choisi (ou clé présente en mode auto), sinon local gratuit."""
-    if get_settings().translator_engine == "claude":
+    """Traducteur selon les réglages : Claude (clé API ou compte via Claude Code), sinon local gratuit."""
+    engine = get_settings().translator_engine
+    if engine == "claude":
         return ClaudeTranslator()
+    if engine == "claude-code":
+        return ClaudeCodeTranslator()
     return OllamaTranslator()
 
 

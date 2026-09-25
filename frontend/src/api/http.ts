@@ -129,5 +129,6 @@ export function createHttpApi(base: string): Api {
     clearCache: () => req("/api/cache", { method: "DELETE" }),
     version: () => req("/api/version"),
     startUpdate: async () => { await req("/api/update", json("POST", { confirm: true })); },
+    claudeLogin: async () => { await req("/api/claude-code/login", json("POST", { confirm: true })); },
   };
 }

@@ -6,7 +6,7 @@ import { LanguageGrid } from "../components/LanguageGrid";
 import { fmtDuration } from "../format";
 import { go } from "../hooks/useRoute";
 import { useI18n } from "../i18n";
-import { errMsg, useApp } from "../store";
+import { errMsg, missingText, useApp } from "../store";
 
 export function ConfigurePage({ project, onChange }: { project: Project; onChange: (p: Project) => void }) {
   const { t } = useI18n();
@@ -37,7 +37,7 @@ export function ConfigurePage({ project, onChange }: { project: Project; onChang
     if (!project.targets.length) { toast({ tone: "warning", text: t("configure.pickTarget") }); return; }
     if (noisy && !window.confirm(t("configure.noisyConfirm"))) return;
     if (missingKeys.length && direct) {
-      toast({ tone: "danger", text: (missingKeys.includes("LOCAL_LLM") ? t("banner.localLlm") : t("banner.missingKeys", { keys: missingKeys.join(", ") })), action: { label: t("banner.goSettings"), run: () => go("/settings") } });
+      toast({ tone: "danger", text: missingText(t, missingKeys), action: { label: t("banner.goSettings"), run: () => go("/settings") } });
       return;
     }
     try {
@@ -127,7 +127,7 @@ export function ConfigurePage({ project, onChange }: { project: Project; onChang
 
       {missingKeys.length > 0 && (
         <Banner tone="warning" action={<button className="btn-secondary btn-sm" onClick={() => go("/settings")}>{t("banner.goSettings")}</button>}>
-          {(missingKeys.includes("LOCAL_LLM") ? t("banner.localLlm") : t("banner.missingKeys", { keys: missingKeys.join(", ") }))}
+          {missingText(t, missingKeys)}
         </Banner>
       )}
 
