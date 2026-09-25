@@ -302,5 +302,7 @@ export function createDemoApi(): Api {
     putSettings: async () => notAvailable(),
     testService: async () => ({ ok: false, error: "Mode démo" }),
     clearCache: async () => ({ freed_bytes: 0 }),
+    version: async () => ({ sha: null, branch: "main", installed_at: null, can_update: false }),
+    startUpdate: async () => notAvailable(),
   };
 }

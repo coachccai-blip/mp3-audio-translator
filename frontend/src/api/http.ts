@@ -127,5 +127,7 @@ export function createHttpApi(base: string): Api {
     putSettings: (body) => req("/api/settings", json("PUT", body)),
     testService: (service) => req(`/api/settings/test/${service}`, { method: "POST" }),
     clearCache: () => req("/api/cache", { method: "DELETE" }),
+    version: () => req("/api/version"),
+    startUpdate: async () => { await req("/api/update", json("POST", { confirm: true })); },
   };
 }

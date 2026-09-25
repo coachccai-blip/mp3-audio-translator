@@ -43,6 +43,7 @@ const en: Dict = {
   "status.pending": "To do", "status.running": "In progress", "status.done": "Done", "status.error": "Error", "status.skipped": "Skipped",
   "processing.summary": "Duration matched within {ms} ms • {n} segment(s) to check", "processing.failed": "Processing failed",
   "processing.offline": "The Doublr server is not responding. Check that the black “Doublr” window is open (otherwise restart Doublr), then click “Resume”.", "processing.lost": "This job was interrupted by a server restart. Click “Resume”: completed steps are kept.",
+  "update.title": "Update", "update.available": "A new version of Doublr is available", "update.body": "Fixes and improvements. Updating takes a few minutes; your projects, settings and keys are kept.", "update.button": "Update Doublr", "update.confirm": "Update Doublr now? The server stops, an update window opens, then Doublr restarts on its own (a few minutes). Avoid updating while a job is running.", "update.startedTitle": "Update in progress", "update.started": "Follow the “Mise à jour de Doublr” window. Doublr reopens on its own when done: then reload this page.", "update.installed": "Installed version: {v}", "update.upToDate": "up to date",
   "processing.cancelled": "Processing cancelled", "processing.resume": "Resume (cache is kept)",
   "processing.toReview": "Review", "processing.toExport": "Export",
   "review.title": "Review", "review.original": "Original", "review.dubbed": "Dubbed",

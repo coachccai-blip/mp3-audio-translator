@@ -42,6 +42,7 @@ const sv: Dict = {
   "status.pending": "Att göra", "status.running": "Pågår", "status.done": "Klar", "status.error": "Fel", "status.skipped": "Hoppades över",
   "processing.summary": "Längden hölls inom {ms} ms • {n} segment att kontrollera", "processing.failed": "Bearbetningen misslyckades",
   "processing.offline": "Doublr-servern svarar inte. Kontrollera att det svarta fönstret ”Doublr” är öppet (annars startar du om Doublr) och klicka sedan på ”Återuppta”.", "processing.lost": "Bearbetningen avbröts av att servern startades om. Klicka på ”Återuppta”: redan klara steg sparas.",
+  "update.title": "Uppdatering", "update.available": "En ny version av Doublr finns", "update.body": "Rättningar och förbättringar. Uppdateringen tar några minuter; dina projekt, inställningar och nycklar sparas.", "update.button": "Uppdatera Doublr", "update.confirm": "Uppdatera Doublr nu? Servern stoppas, ett uppdateringsfönster öppnas och sedan startar Doublr om av sig självt (några minuter). Undvik att uppdatera under en bearbetning.", "update.startedTitle": "Uppdatering pågår", "update.started": "Följ fönstret ”Mise à jour de Doublr”. Doublr öppnas igen av sig självt när det är klart: ladda då om den här sidan.", "update.installed": "Installerad version: {v}", "update.upToDate": "aktuell",
   "processing.cancelled": "Bearbetningen avbröts", "processing.resume": "Återuppta (cachen behålls)",
   "processing.toReview": "Granska", "processing.toExport": "Exportera",
   "review.title": "Granskning", "review.original": "Original", "review.dubbed": "Dubbat",

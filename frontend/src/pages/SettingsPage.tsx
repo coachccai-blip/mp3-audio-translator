@@ -3,6 +3,7 @@ import type { Voice } from "../api/types";
 import { useToast } from "../components/Feedback";
 import { Icon } from "../components/Icon";
 import { PlayButton } from "../components/PlayButton";
+import { UpdateSection } from "../components/UpdateNotice";
 import { fmtBytes } from "../format";
 import type { ThemePref } from "../hooks/useTheme";
 import { UI_LANG_NAMES, useI18n, type UiLang } from "../i18n";
@@ -173,6 +174,7 @@ export function SettingsPage({ theme, setTheme }: { theme: ThemePref; setTheme: 
         </section>
       )}
 
+      <UpdateSection />
       <section className="card space-y-2 p-5">
         <h2 className="font-semibold">{t("settings.privacy")}</h2>
         <p className="text-sm text-muted">{t("settings.privacyText")}</p>
