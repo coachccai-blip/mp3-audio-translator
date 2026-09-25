@@ -114,12 +114,6 @@ def prepare_file(ctx: Ctx, f: AudioFile, project: Project) -> None:
     ctx.on_step("separate", "done", sep.engine)
     ctx.check()
 
-    try:  # charge le modèle de traduction local pendant la transcription (facultatif)
-        translator = eng.translator()
-        if hasattr(translator, "warm_up"):
-            threading.Thread(target=translator.warm_up, daemon=True).start()
-    except Exception:
-        pass
     ctx.on_step("transcribe", "running", None)
     language = project.source_lang if project.settings.get("source_locked") else None
     try:
