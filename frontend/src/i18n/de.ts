@@ -41,6 +41,7 @@ const de: Dict = {
   "step.translate": "Übersetzung", "step.synthesize": "Stimmen werden erzeugt", "step.assemble": "Zusammenfügen",
   "status.pending": "Ausstehend", "status.running": "Läuft", "status.done": "Fertig", "status.error": "Fehler", "status.skipped": "Übersprungen",
   "processing.summary": "Dauer auf {ms} ms genau eingehalten • {n} Segment(e) zu prüfen", "processing.failed": "Verarbeitung fehlgeschlagen",
+  "processing.offline": "Der Doublr-Server antwortet nicht mehr. Prüfen Sie, ob das schwarze Fenster „Doublr“ geöffnet ist (sonst Doublr neu starten), und klicken Sie dann auf „Fortsetzen“.", "processing.lost": "Diese Verarbeitung wurde durch einen Neustart des Servers unterbrochen. Klicken Sie auf „Fortsetzen“: Erledigte Schritte bleiben erhalten.",
   "processing.cancelled": "Verarbeitung abgebrochen", "processing.resume": "Fortsetzen (Cache bleibt erhalten)",
   "processing.toReview": "Prüfen", "processing.toExport": "Exportieren",
   "review.title": "Prüfung", "review.original": "Original", "review.dubbed": "Synchronisiert",

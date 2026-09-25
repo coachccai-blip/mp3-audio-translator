@@ -88,7 +88,7 @@ export function ProcessingPage({ project, reload }: { project: Project; reload: 
 
       {job.status === "error" && (
         <Banner tone="danger" title={t("processing.failed")} action={<button className="btn-secondary btn-sm" onClick={resume}>{t("processing.resume")}</button>}>
-          {job.error}
+          {job.error === "offline" || job.error === "lost" ? t(`processing.${job.error}`) : job.error}
         </Banner>
       )}
       {job.status === "cancelled" && (

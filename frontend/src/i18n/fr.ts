@@ -46,6 +46,7 @@ const fr = {
   "status.error": "Erreur", "status.skipped": "Ignoré",
   "processing.summary": "Durée respectée à {ms} ms près • {n} segment(s) à vérifier",
   "processing.failed": "Le traitement a échoué", "processing.cancelled": "Traitement annulé",
+  "processing.offline": "Le serveur Doublr ne répond plus. Vérifiez que la fenêtre noire « Doublr » est ouverte (sinon relancez Doublr), puis cliquez sur « Reprendre ».", "processing.lost": "Ce traitement a été interrompu par un redémarrage du serveur. Cliquez sur « Reprendre » : les étapes déjà faites sont conservées.",
   "processing.resume": "Reprendre (le cache est conservé)", "processing.toReview": "Réviser", "processing.toExport": "Exporter",
   "review.title": "Révision", "review.original": "Original", "review.dubbed": "Doublé",
   "review.shortcuts": "Espace : lecture/pause · Tab : original/doublé · ←/→ : segment précédent/suivant",

@@ -95,15 +95,18 @@ def separate(src: Path, out_dir: Path, device: str = "auto") -> Separation:
         # Repli : pas de séparation → on considère que tout est voix, le fond n'est pas conservé.
         save(data, sr, vocals)
         return Separation(vocals, None, "none")
-    try:
-        from . import worker
+    from . import worker
 
-        has_background = worker.run("separate.separate_to_files", str(src), str(vocals), str(background), device)
+    try:
+        has_background = worker.run_on_device("separate.separate_to_files", str(src), str(vocals), str(background),
+                                              device=device, pool="torch")
         return Separation(vocals, background if has_background else None, "demucs")
     except Exception:  # repli : Demucs en ligne de commande
         pass
     cmd = [sys.executable, "-m", "demucs", "-n", "htdemucs", "--two-stems", "vocals", "-o", str(out_dir / "demucs")]
     engine = "demucs-cli"
+    if worker.gpu_broken("torch"):
+        device = "cpu"
     if device in ("cpu", "cuda", "mps"):
         cmd += ["-d", device]
     wav_in = out_dir / "input.wav"

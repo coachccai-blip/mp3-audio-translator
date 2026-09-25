@@ -41,6 +41,7 @@ const it: Dict = {
   "step.translate": "Traduzione", "step.synthesize": "Generazione delle voci", "step.assemble": "Montaggio",
   "status.pending": "Da fare", "status.running": "In corso", "status.done": "Completato", "status.error": "Errore", "status.skipped": "Saltato",
   "processing.summary": "Durata rispettata entro {ms} ms • {n} segmento/i da verificare", "processing.failed": "Elaborazione non riuscita",
+  "processing.offline": "Il server di Doublr non risponde. Verificate che la finestra nera «Doublr» sia aperta (altrimenti riavviate Doublr), poi cliccate su «Riprendi».", "processing.lost": "L'elaborazione è stata interrotta da un riavvio del server. Cliccate su «Riprendi»: i passaggi già completati sono conservati.",
   "processing.cancelled": "Elaborazione annullata", "processing.resume": "Riprendi (la cache è conservata)",
   "processing.toReview": "Rivedi", "processing.toExport": "Esporta",
   "review.title": "Revisione", "review.original": "Originale", "review.dubbed": "Doppiato",

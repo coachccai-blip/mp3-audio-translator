@@ -19,19 +19,19 @@ def pyannote_available() -> bool:
         return False
 
 
-@lru_cache(maxsize=1)
-def _pipeline():
+@lru_cache(maxsize=2)
+def _pipeline(device: str = "auto"):
     from pyannote.audio import Pipeline
 
     import torch
 
     pipeline = Pipeline.from_pretrained("pyannote/speaker-diarization-3.1", use_auth_token=os.environ["HF_TOKEN"])
-    if torch.cuda.is_available():
+    if device != "cpu" and torch.cuda.is_available():
         pipeline.to(torch.device("cuda"))
     return pipeline
 
 
-def diarize(path: Path) -> list[tuple[float, float, str]]:
+def diarize(path: Path, device: str = "auto") -> list[tuple[float, float, str]]:
     """Renvoie des tours de parole (début, fin, locuteur). Liste vide si indisponible.
 
     pyannote (PyTorch) tourne dans le processus dédié : voir worker.py.
@@ -40,17 +40,17 @@ def diarize(path: Path) -> list[tuple[float, float, str]]:
         return []
     from . import worker
 
-    return [tuple(t) for t in worker.run("diarize.diarize_here", str(path))]
+    return [tuple(t) for t in worker.run_on_device("diarize.diarize_here", str(path), device=device, pool="torch")]
 
 
-def diarize_here(path: str) -> list[tuple[float, float, str]]:
+def diarize_here(path: str, device: str = "auto") -> list[tuple[float, float, str]]:
     import torch
 
     from .audio import load
 
     data, sr = load(path)
     # Audio passé en mémoire : évite la dépendance de pyannote au décodage de fichiers (FFmpeg).
-    annotation = _pipeline()({"waveform": torch.from_numpy(data.T.copy()), "sample_rate": sr})
+    annotation = _pipeline(device)({"waveform": torch.from_numpy(data.T.copy()), "sample_rate": sr})
     return [(t.start, t.end, spk) for t, _, spk in annotation.itertracks(yield_label=True)]
 
 

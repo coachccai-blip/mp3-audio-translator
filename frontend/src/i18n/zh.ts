@@ -41,6 +41,7 @@ const zh: Dict = {
   "step.translate": "翻译", "step.synthesize": "生成声音", "step.assemble": "合成",
   "status.pending": "待处理", "status.running": "进行中", "status.done": "已完成", "status.error": "错误", "status.skipped": "已跳过",
   "processing.summary": "时长误差在 {ms} 毫秒以内 • {n} 个片段待检查", "processing.failed": "处理失败",
+  "processing.offline": "Doublr 服务器没有响应。请确认黑色的“Doublr”窗口仍然打开（否则请重新启动 Doublr），然后点击“继续”。", "processing.lost": "服务器重启中断了此处理。请点击“继续”：已完成的步骤会保留。",
   "processing.cancelled": "处理已取消", "processing.resume": "继续（保留缓存）",
   "processing.toReview": "审阅", "processing.toExport": "导出",
   "review.title": "审阅", "review.original": "原声", "review.dubbed": "配音",

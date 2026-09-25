@@ -16,6 +16,7 @@ from .services.jobs import manager
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     get_engine()
+    manager.mark_interrupted()
     yield
 
 
@@ -50,11 +51,10 @@ async def job_ws(ws: WebSocket, job_id: str):
     await ws.accept()
     try:
         while True:
-            state = manager.get(job_id)
-            if state is None:
+            snap = manager.snapshot(job_id=job_id)
+            if snap is None:
                 await ws.send_json({"error": "Job introuvable"})
                 break
-            snap = state.snapshot()
             await ws.send_json(snap)
             if snap["status"] in ("done", "error", "cancelled"):
                 break

@@ -124,8 +124,20 @@ def _on_gpu(model) -> bool:
 
 def transcribe(path: Path, model_name: str = "large-v3", device: str = "auto", language: str | None = None,
                on_unit=None) -> Transcript:
+    """Whisper tourne dans son propre processus (voir worker.py) ; repli sur processeur si la carte plante."""
     if not whisper_available():
         raise TranscriptionUnavailable("faster-whisper n'est pas installé (pip install -e \".[ai]\").")
+    from . import worker
+
+    transcript, texts = worker.run_on_device("transcribe.transcribe_here", str(path), model_name, language,
+                                             device=device, pool="whisper")
+    if on_unit:
+        for text in texts:
+            on_unit(text)
+    return transcript
+
+
+def transcribe_here(path: str, model_name: str, language: str | None, device: str) -> tuple[Transcript, list[str]]:
     model = _model(model_name, device)
     segments = info = None
     if _on_gpu(model):
@@ -140,22 +152,30 @@ def transcribe(path: Path, model_name: str = "large-v3", device: str = "auto", l
     if segments is None:
         segments, info = model.transcribe(str(path), language=language, word_timestamps=True, vad_filter=True)
     words: list[Word] = []
+    texts: list[str] = []
     for seg in segments:
         for w in seg.words or []:
             words.append(Word(start=float(w.start), end=float(w.end), word=w.word))
-        if on_unit:
-            on_unit(seg.text.strip())
-    return Transcript(language=info.language, language_probability=float(info.language_probability),
-                      units=group_words(words))
+        texts.append(seg.text.strip())
+    transcript = Transcript(language=info.language, language_probability=float(info.language_probability),
+                            units=group_words(words))
+    return transcript, texts
 
 
 def detect_language(path: Path, model_name: str = "large-v3", device: str = "auto") -> tuple[str, float] | None:
     """Détection rapide de la langue source (30 premières secondes)."""
     if not whisper_available():
         return None
+    from . import worker
+
+    return worker.run_on_device("transcribe.detect_language_here", str(path), model_name, device=device,
+                                pool="whisper")
+
+
+def detect_language_here(path: str, model_name: str, device: str) -> tuple[str, float]:
     from faster_whisper.audio import decode_audio
 
     model = _model(model_name, device)
-    audio = decode_audio(str(path), sampling_rate=16000)[: 16000 * 30]
+    audio = decode_audio(path, sampling_rate=16000)[: 16000 * 30]
     lang, prob, _ = model.detect_language(audio)
     return lang, float(prob)

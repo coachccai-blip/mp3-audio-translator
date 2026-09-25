@@ -234,8 +234,13 @@ $Launcher = Join-Path $Root 'Doublr.bat'
     'echo   Pour arreter Doublr, fermez cette fenetre.',
     'echo.',
     'start "" /min powershell -NoProfile -WindowStyle Hidden -Command "Start-Sleep 6; Start-Process ''http://localhost:8000''"',
+    ':serveur',
     "`"$VPy`" -m uvicorn app.main:app --host 127.0.0.1 --port 8000",
-    'pause'
+    'echo.',
+    'echo   Le serveur Doublr s''est arrete : redemarrage automatique dans 3 secondes...',
+    'echo   (fermez cette fenetre pour arreter Doublr)',
+    'timeout /t 3 /nobreak >nul',
+    'goto serveur'
 ) | Set-Content -Path $Launcher -Encoding ASCII
 $Updater = Join-Path $Root 'Mettre-a-jour-Doublr.bat'
 @(

@@ -41,6 +41,7 @@ const pl: Dict = {
   "step.translate": "Tłumaczenie", "step.synthesize": "Generowanie głosów", "step.assemble": "Montaż",
   "status.pending": "Do zrobienia", "status.running": "W toku", "status.done": "Gotowe", "status.error": "Błąd", "status.skipped": "Pominięto",
   "processing.summary": "Czas trwania zachowany z dokładnością do {ms} ms • segmenty do sprawdzenia: {n}", "processing.failed": "Przetwarzanie nie powiodło się",
+  "processing.offline": "Serwer Doublr nie odpowiada. Sprawdź, czy czarne okno „Doublr” jest otwarte (w przeciwnym razie uruchom Doublr ponownie), a następnie kliknij „Wznów”.", "processing.lost": "Przetwarzanie zostało przerwane przez ponowne uruchomienie serwera. Kliknij „Wznów”: ukończone kroki zostają zachowane.",
   "processing.cancelled": "Przetwarzanie anulowane", "processing.resume": "Wznów (pamięć podręczna zachowana)",
   "processing.toReview": "Weryfikuj", "processing.toExport": "Eksportuj",
   "review.title": "Weryfikacja", "review.original": "Oryginał", "review.dubbed": "Dubbing",

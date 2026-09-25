@@ -41,6 +41,7 @@ const sv: Dict = {
   "step.translate": "Översättning", "step.synthesize": "Röstgenerering", "step.assemble": "Sammanfogning",
   "status.pending": "Att göra", "status.running": "Pågår", "status.done": "Klar", "status.error": "Fel", "status.skipped": "Hoppades över",
   "processing.summary": "Längden hölls inom {ms} ms • {n} segment att kontrollera", "processing.failed": "Bearbetningen misslyckades",
+  "processing.offline": "Doublr-servern svarar inte. Kontrollera att det svarta fönstret ”Doublr” är öppet (annars startar du om Doublr) och klicka sedan på ”Återuppta”.", "processing.lost": "Bearbetningen avbröts av att servern startades om. Klicka på ”Återuppta”: redan klara steg sparas.",
   "processing.cancelled": "Bearbetningen avbröts", "processing.resume": "Återuppta (cachen behålls)",
   "processing.toReview": "Granska", "processing.toExport": "Exportera",
   "review.title": "Granskning", "review.original": "Original", "review.dubbed": "Dubbat",

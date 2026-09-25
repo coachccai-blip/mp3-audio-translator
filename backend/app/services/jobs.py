@@ -15,6 +15,7 @@ from .catalog import NoNativeVoiceError
 
 PREPARE_STEPS = ["separate", "transcribe", "diarize"]
 DUB_STEPS = ["translate", "synthesize", "assemble"]
+INTERRUPTED = "Le traitement a été interrompu (le serveur s'est arrêté). Cliquez sur « Reprendre » : les étapes déjà faites sont conservées."
 
 
 class JobState:
@@ -78,6 +79,32 @@ class JobManager:
     def latest_for(self, project_id: str) -> JobState | None:
         states = [j for j in self.jobs.values() if j.project_id == project_id]
         return states[-1] if states else None
+
+    def snapshot(self, job_id: str | None = None, project_id: str | None = None) -> dict | None:
+        """État d'un traitement, y compris d'avant un redémarrage du serveur (lu en base)."""
+        state = self.get(job_id) if job_id else self.latest_for(project_id)
+        if state:
+            return state.snapshot()
+        with session() as db:
+            q = select(Job).where(Job.id == job_id) if job_id else \
+                select(Job).where(Job.project_id == project_id).order_by(Job.started_at.desc(), Job.id.desc())
+            job = db.exec(q).first()
+            if job is None:
+                return None
+            return {"id": job.id, "project_id": job.project_id, "kind": job.kind, "status": job.status,
+                    "error": job.error, "progress": job.progress, "elapsed_s": 0.0, "eta_s": None,
+                    "files": job.steps or [], "logs": job.logs or [], "transcript_preview": [], "result": {}}
+
+    @staticmethod
+    def mark_interrupted() -> int:
+        """Au démarrage : les traitements restés « en cours » ont été interrompus par l'arrêt du serveur."""
+        with session() as db:
+            jobs = db.exec(select(Job).where(Job.status.in_(["queued", "running"]))).all()
+            for job in jobs:
+                job.status, job.error = "error", INTERRUPTED
+                job.started_at = job.started_at or datetime.now(timezone.utc)
+            db.commit()
+            return len(jobs)
 
     def submit(self, project_id: str, kind: str, fn: Callable[[JobState], dict | None]) -> JobState:
         with session() as db:
