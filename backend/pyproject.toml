@@ -31,6 +31,7 @@ ai = [
   "pyrubberband>=0.3",
   # Mode gratuit : voix locales
   "kokoro-onnx>=0.4.9,<1",
+  "misaki[zh]>=0.9,<1",  # prononciation native du mandarin avec Kokoro
   "piper-tts>=1.3,<2",
 ]
 dev = ["pytest>=8", "httpx>=0.27"]

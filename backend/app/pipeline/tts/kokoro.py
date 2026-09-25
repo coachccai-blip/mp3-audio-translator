@@ -19,6 +19,25 @@ FILES = ("kokoro-v1.0.onnx", "voices-v1.0.bin")
 LANG = {"en-US": "en-us", "en-GB": "en-gb", "fr-FR": "fr-fr", "es-ES": "es", "it-IT": "it", "zh-CN": "cmn"}
 _lock = threading.Lock()
 _model = None
+_zh_g2p = None
+
+
+def _mandarin_phonemes(text: str) -> str | None:
+    """Phonèmes du chinois mandarin (pinyin, tons) avec le convertisseur officiel de Kokoro (misaki).
+
+    Le modèle a été entraîné avec lui : la phonétisation générique d'espeak (« cmn ») donne un accent
+    étranger. Renvoie None si misaki n'est pas installé (repli sur espeak).
+    """
+    global _zh_g2p
+    try:
+        if _zh_g2p is None:
+            from misaki import zh
+
+            _zh_g2p = zh.ZHG2P()
+        phonemes, _ = _zh_g2p(text)
+        return phonemes or None
+    except Exception:
+        return None
 
 
 def model_dir() -> Path:
@@ -81,7 +100,12 @@ class KokoroTTS(TTSProvider):
             raise TTSError(f"Kokoro ne couvre pas cette langue ({voice_id}).")
         try:
             with _lock:  # une seule synthèse à la fois : la session ONNX utilise déjà tous les cœurs
-                samples, sr = _load().create(text, voice=native_voice_name(voice_id), speed=float(rate), lang=lang)
+                phonemes = _mandarin_phonemes(text) if lang == "cmn" else None
+                if phonemes:
+                    samples, sr = _load().create(phonemes, voice=native_voice_name(voice_id), speed=float(rate),
+                                                 lang=lang, is_phonemes=True)
+                else:
+                    samples, sr = _load().create(text, voice=native_voice_name(voice_id), speed=float(rate), lang=lang)
         except TTSError:
             raise
         except Exception as exc:

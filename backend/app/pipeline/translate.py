@@ -20,7 +20,7 @@ REGION_HINTS = {
     "fr-FR": "France", "fr-CA": "Québec/Canada (vocabulaire et tournures québécoises)",
     "fr-BE": "Belgium (septante, nonante…)", "fr-CH": "Switzerland (septante, huitante, nonante…)",
     "en-US": "United States (American spelling and idioms)", "en-GB": "United Kingdom (British spelling and idioms)",
-    "en-AU": "Australia", "en-IE": "Ireland", "zh-CN": "Mainland China (Simplified characters)",
+    "en-AU": "Australia", "en-IE": "Ireland", "zh-CN": "Mainland China: Standard Mandarin (Putonghua), Simplified characters only, mainland vocabulary and phrasing",
     "zh-TW": "Taiwan (Traditional characters, Taiwanese Mandarin usage)", "de-DE": "Germany",
     "de-AT": "Austria (österreichisches Deutsch)", "de-CH": "Switzerland (Schweizer Hochdeutsch, no ß)",
     "sv-SE": "Sweden", "es-ES": "Spain (peninsular Spanish, vosotros)", "es-MX": "Mexico (ustedes)",
