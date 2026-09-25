@@ -58,8 +58,9 @@ export interface SettingsT {
   keys: Record<string, boolean>; tts_provider: string; whisper_model: string; device: string; azure_region: string;
   claude_model: string; output_dir: string; data_dir: string; cache_bytes: number; require_validated_voices: boolean;
   capabilities: { whisper: boolean; demucs: boolean; pyannote: boolean; kokoro?: boolean; piper?: boolean };
-  translator?: "auto" | "local" | "claude"; translator_engine?: "local" | "claude"; local_llm?: string;
+  translator?: "auto" | "local" | "claude" | "claude-code"; translator_engine?: "local" | "claude" | "claude-code"; local_llm?: string;
   ollama?: { running: boolean; model: string; model_ready: boolean }; missing?: string[];
+  claude_code?: { installed: boolean };
 }
 export interface ExportBody {
   format: string; voice_only: boolean; background_only: boolean; subtitles: boolean; report: boolean;
@@ -111,9 +112,10 @@ export interface Api {
   exportProject(pid: string, body: ExportBody): Promise<ExportResult>;
   exportFileUrl(eid: string, name: string): string;
   getSettings(): Promise<SettingsT>;
-  putSettings(body: { keys?: Record<string, string>; values?: Record<string, string> }): Promise<SettingsT>;
+  putSettings(body: { keys?: Record<string, string>; values?: Record<string, string>; remove_keys?: string[] }): Promise<SettingsT>;
   testService(service: string): Promise<{ ok: boolean; error?: string }>;
   clearCache(): Promise<{ freed_bytes: number }>;
   version(): Promise<VersionInfo>;
   startUpdate(): Promise<void>;
+  claudeLogin(): Promise<void>;
 }

@@ -98,7 +98,7 @@ class Settings:
 
     @property
     def translator_engine(self) -> str:
-        if self.translator in ("local", "claude"):
+        if self.translator in ("local", "claude", "claude-code"):
             return self.translator
         return "claude" if self.has_key("ANTHROPIC_API_KEY") else "local"
 

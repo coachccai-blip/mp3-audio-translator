@@ -97,6 +97,7 @@ export function SettingsPage({ theme, setTheme }: { theme: ThemePref; setTheme: 
             <option value="auto">{t("translator.auto")}</option>
             <option value="local">{t("translator.local")}</option>
             <option value="claude">{t("translator.claude")}</option>
+            <option value="claude-code">{t("translator.claudeCode")}</option>
           </select>
         </label>
         {settings?.translator_engine === "local" && (

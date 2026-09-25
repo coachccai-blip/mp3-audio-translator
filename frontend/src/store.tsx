@@ -79,6 +79,13 @@ export function useApp() {
   return c;
 }
 
+/** Message affiché quand quelque chose manque pour lancer un doublage. */
+export function missingText(t: ReturnType<typeof useI18n>["t"], missing: string[]): string {
+  if (missing.includes("LOCAL_LLM")) return t("banner.localLlm");
+  if (missing.includes("CLAUDE_CODE")) return t("banner.claudeCode");
+  return t("banner.missingKeys", { keys: missing.join(", ") });
+}
+
 export function errMsg(e: unknown): string {
   if (e instanceof Error) return e.message;
   return String(e);

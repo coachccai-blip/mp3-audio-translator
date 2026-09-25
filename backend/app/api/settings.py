@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import os
 import shutil
+from pathlib import Path
 
 import httpx
 from fastapi import APIRouter, HTTPException
@@ -13,7 +14,7 @@ from ..config import SECRET_KEYS, get_settings, write_env_values
 from ..pipeline.diarize import pyannote_available
 from ..pipeline.separate import demucs_available
 from ..pipeline.transcribe import whisper_available
-from ..pipeline.translate import ollama_status
+from ..pipeline.translate import claude_code_path, ollama_status, run_claude_code
 from ..pipeline.tts import provider_available
 from ..services import engines
 from .projects import missing_requirements
@@ -47,12 +48,14 @@ def get_settings_route():
                          "kokoro": provider_available("kokoro"), "piper": provider_available("piper")},
         "translator": s.translator, "translator_engine": s.translator_engine, "local_llm": s.local_llm,
         "ollama": ollama_status(), "missing": missing_requirements(),
+        "claude_code": {"installed": claude_code_path() is not None},
     }
 
 
 class SettingsBody(BaseModel):
     keys: dict[str, str] | None = None
     values: dict[str, str] | None = None
+    remove_keys: list[str] | None = None   # « Déconnecter » : efface la clé du fichier .env
 
 
 @router.put("/settings")
@@ -64,8 +67,13 @@ def put_settings(body: SettingsBody):
     for k, v in (body.values or {}).items():
         if k in EDITABLE:
             updates[k] = str(v)
+    removed = [k for k in (body.remove_keys or []) if k in SECRET_KEYS]
+    for k in removed:
+        updates[k] = ""
     if updates:
         write_env_values(updates)
+        for k in removed:
+            os.environ.pop(k, None)
         config.reload_settings()
         engines.set_engines(None)
         get_catalog.cache_clear()
@@ -75,7 +83,9 @@ def put_settings(body: SettingsBody):
 @router.post("/settings/test/{service}")
 def test_connection(service: str):
     try:
-        if service == "anthropic":
+        if service == "claude-code":
+            run_claude_code("Reply with the single word OK.", timeout=120)
+        elif service == "anthropic":
             import anthropic
 
             anthropic.Anthropic().models.retrieve(get_settings().claude_model)
@@ -157,4 +167,48 @@ def start_update(body: UpdateRequest):
     subprocess.Popen(["cmd", "/c", "start", "Mise a jour de Doublr", str(updater)], creationflags=flags,
                      close_fds=True, cwd=str(updater.parent))
     threading.Timer(2.0, lambda: os._exit(0)).start()
+    return {"ok": True}
+
+
+# --- Connexion au compte Claude (Claude Code) -------------------------------------------
+
+LOGIN_SCRIPT = r"""
+$ErrorActionPreference = 'Continue'
+Write-Host ''
+Write-Host '  Connexion de Doublr a votre compte Claude' -ForegroundColor Cyan
+$c = (Get-Command claude -ErrorAction SilentlyContinue).Source
+if (-not $c) {
+    $local = Join-Path $env:USERPROFILE '.local\bin\claude.exe'
+    if (Test-Path $local) { $c = $local }
+}
+if (-not $c) {
+    Write-Host '  Installation de Claude Code (outil officiel d''Anthropic)...'
+    irm https://claude.ai/install.ps1 | iex
+    $c = Join-Path $env:USERPROFILE '.local\bin\claude.exe'
+}
+Write-Host ''
+Write-Host '  1. Choisissez la connexion avec votre compte Claude (abonnement Pro ou Max).'
+Write-Host '  2. Validez dans le navigateur qui s''ouvre.'
+Write-Host '  3. Une fois connecte, tapez /exit puis revenez dans Doublr et cliquez sur Verifier.'
+Write-Host ''
+& $c
+"""
+
+
+@router.post("/claude-code/login")
+def claude_code_login(body: UpdateRequest):
+    """Ouvre une fenêtre qui installe Claude Code si besoin puis lance la connexion au compte Claude."""
+    import subprocess
+    import tempfile
+
+    if not body.confirm:
+        raise HTTPException(400, "Connexion non confirmée.")
+    if os.name != "nt":
+        raise HTTPException(400, "Installez Claude Code (https://claude.com/claude-code), lancez « claude » dans un "
+                                 "terminal pour vous connecter à votre compte Claude, puis cliquez sur Vérifier.")
+    script = Path(tempfile.gettempdir()) / "doublr-connexion-claude.ps1"
+    script.write_text(LOGIN_SCRIPT, encoding="utf-8-sig")
+    subprocess.Popen(["cmd", "/c", "start", "Connexion a Claude", "powershell", "-NoProfile", "-NoExit",
+                      "-ExecutionPolicy", "Bypass", "-File", str(script)],
+                     creationflags=getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0), close_fds=True)
     return {"ok": True}

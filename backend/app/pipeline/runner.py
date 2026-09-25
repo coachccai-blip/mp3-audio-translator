@@ -120,10 +120,16 @@ def prepare_file(ctx: Ctx, f: AudioFile, project: Project) -> None:
         # Modèle des Réglages (large-v3 par défaut : le plus rapide mesuré sur processeur, CI Windows 4 cœurs :
         # 38 s contre 79–123 s pour large-v3-turbo). « Précise » force large-v3.
         kwargs = {"model": "large-v3"} if project.settings.get("quality") == "precise" else {}
-        tr = eng.transcribe(sep.vocals, language=language, on_unit=ctx.on_text, **kwargs)
+        tr = eng.transcribe(sep.vocals, language=language, on_unit=ctx.on_text,
+                            on_progress=lambda done, total: ctx.on_step("transcribe", "running",
+                                                                        f"{int(done)}/{max(int(total), 1)}"),
+                            **kwargs)
     except TranscriptionUnavailable as exc:
         raise RuntimeError(str(exc)) from exc
-    ctx.on_step("transcribe", "done", f"{len(tr.units)} segments")
+    where = {"cuda": " · carte graphique", "cpu": " · processeur"}.get(getattr(tr, "device", ""), "")
+    if getattr(tr, "note", ""):
+        ctx.on_log(f"Transcription sur processeur (plus lente) : {tr.note}.")
+    ctx.on_step("transcribe", "done", f"{len(tr.units)} segments{where}")
     ctx.check()
 
     ctx.on_step("diarize", "running", None)

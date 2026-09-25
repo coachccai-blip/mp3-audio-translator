@@ -13,7 +13,7 @@ import { ProcessingPage } from "./pages/ProcessingPage";
 import { ReviewPage } from "./pages/ReviewPage";
 import { SettingsPage } from "./pages/SettingsPage";
 import { SpeakersPage } from "./pages/SpeakersPage";
-import { errMsg, useApp } from "./store";
+import { errMsg, missingText, useApp } from "./store";
 
 const README = "https://github.com/coachccai-blip/mp3-audio-translator#readme";
 const FLOW: { screen: Screen | "import"; key: "flow.import" | "flow.configure" | "flow.speakers" | "flow.processing" | "flow.review" | "flow.export" }[] = [
@@ -98,7 +98,7 @@ export default function App() {
         {ready && api.mode === "local" && <UpdateBanner />}
         {route.name === "home" && missingKeys.length > 0 && (
           <Banner tone="warning" action={<a className="btn-secondary btn-sm" href="#/settings">{t("banner.goSettings")}</a>}>
-            {(missingKeys.includes("LOCAL_LLM") ? t("banner.localLlm") : t("banner.missingKeys", { keys: missingKeys.join(", ") }))}
+            {missingText(t, missingKeys)}
           </Banner>
         )}
         {screenTitle && (

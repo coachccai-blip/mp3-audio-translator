@@ -304,5 +304,6 @@ export function createDemoApi(): Api {
     clearCache: async () => ({ freed_bytes: 0 }),
     version: async () => ({ sha: null, branch: "main", installed_at: null, can_update: false }),
     startUpdate: async () => notAvailable(),
+    claudeLogin: async () => notAvailable(),
   };
 }

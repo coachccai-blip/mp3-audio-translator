@@ -206,6 +206,10 @@ def missing_requirements() -> list[str]:
     s = get_settings()
     if s.translator_engine == "claude":
         return [] if s.has_key("ANTHROPIC_API_KEY") else ["ANTHROPIC_API_KEY"]
+    if s.translator_engine == "claude-code":
+        from ..pipeline.translate import claude_code_path
+
+        return [] if claude_code_path() else ["CLAUDE_CODE"]
     from ..pipeline.translate import ollama_status
 
     return [] if ollama_status()["model_ready"] else ["LOCAL_LLM"]
@@ -216,7 +220,8 @@ def _require_keys(need_translation: bool = True):
     if missing:
         msg = ("Le traducteur local gratuit n'est pas prêt (Ollama et son modèle). Lancez Doublr avec son raccourci, "
                "ou relancez l'installateur." if missing == ["LOCAL_LLM"]
-               else "Clé API manquante : renseignez-la dans Réglages.")
+               else "Claude Code n'est pas installé : sur l'accueil, cliquez sur « Se connecter à mon compte Claude »."
+               if missing == ["CLAUDE_CODE"] else "Clé API manquante : renseignez-la dans Réglages.")
         raise HTTPException(412, {"code": "missing_keys", "keys": missing, "message": msg})
 
 

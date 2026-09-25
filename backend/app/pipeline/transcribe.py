@@ -1,7 +1,12 @@
 """Étape 3 — transcription horodatée (faster-whisper) et regroupement en unités de sens."""
 from __future__ import annotations
 
+import json
+import os
 import re
+import sys
+import tempfile
+import threading
 from dataclasses import asdict, dataclass, field
 from functools import lru_cache
 from pathlib import Path
@@ -37,6 +42,8 @@ class Transcript:
     language: str
     language_probability: float
     units: list[Unit]
+    device: str = ""        # « cuda » ou « cpu » : où Whisper a réellement tourné
+    note: str = ""          # raison du repli sur processeur, le cas échéant
 
 
 class TranscriptionUnavailable(Exception):
@@ -90,15 +97,39 @@ def group_words(words: list[Word], min_s: float = MIN_UNIT_S, max_s: float = MAX
 
 
 def whisper_available() -> bool:
-    try:
-        import faster_whisper  # noqa: F401
-        return True
-    except Exception:
-        return False
+    # Sans importer CTranslate2 dans le serveur : il ne doit être chargé que dans le processus Whisper.
+    import importlib.util
+
+    return importlib.util.find_spec("faster_whisper") is not None
+
+
+def _add_cuda_dlls() -> None:
+    """Windows : bibliothèques NVIDIA (cuBLAS, cuDNN 9) installées par pip dans l'environnement.
+
+    CTranslate2 ne les embarque pas ; sans elles, Whisper retombe sur le processeur (très lent).
+    Le processus Whisper n'importe jamais PyTorch : pas de conflit avec le cuDNN de PyTorch.
+    """
+    if os.name != "nt":
+        return
+    base = Path(sys.prefix) / "Lib" / "site-packages" / "nvidia"
+    dirs = [str(d) for d in sorted(base.glob("*/bin")) if d.is_dir()] if base.is_dir() else []
+    for d in dirs:
+        try:
+            os.add_dll_directory(d)
+        except OSError:
+            pass
+    if dirs:
+        os.environ["PATH"] = os.pathsep.join(dirs + [os.environ.get("PATH", "")])
+
+
+_gpu_note = ""
 
 
 @lru_cache(maxsize=2)
 def _model(name: str, device: str):
+    global _gpu_note
+    if device in ("cuda", "auto"):
+        _add_cuda_dlls()
     from faster_whisper import WhisperModel
 
     def make(**kw):
@@ -109,9 +140,13 @@ def _model(name: str, device: str):
 
     if device in ("cuda", "auto"):
         try:
-            return make(device="cuda", compute_type="float16")
-        except Exception:  # pas de GPU NVIDIA / bibliothèques CUDA absentes → CPU
-            pass
+            import ctranslate2
+
+            if ctranslate2.get_cuda_device_count() > 0:
+                return make(device="cuda", compute_type="float16")
+            _gpu_note = "aucune carte graphique NVIDIA utilisable"
+        except Exception as exc:  # bibliothèques CUDA absentes ou incompatibles → CPU
+            _gpu_note = f"carte graphique inutilisable ({str(exc)[:160]})"
     return make(device="cpu", compute_type="int8")
 
 
@@ -123,21 +158,57 @@ def _on_gpu(model) -> bool:
 
 
 def transcribe(path: Path, model_name: str = "large-v3", device: str = "auto", language: str | None = None,
-               on_unit=None) -> Transcript:
-    """Whisper tourne dans son propre processus (voir worker.py) ; repli sur processeur si la carte plante."""
+               on_unit=None, on_progress=None) -> Transcript:
+    """Whisper tourne dans son propre processus (voir worker.py) ; repli sur processeur si la carte plante.
+
+    La progression (texte reconnu, secondes traitées) remonte en direct via un petit fichier.
+    """
     if not whisper_available():
         raise TranscriptionUnavailable("faster-whisper n'est pas installé (pip install -e \".[ai]\").")
     from . import worker
 
-    transcript, texts = worker.run_on_device("transcribe.transcribe_here", str(path), model_name, language,
-                                             device=device, pool="whisper")
-    if on_unit:
-        for text in texts:
-            on_unit(text)
-    return transcript
+    fd, name = tempfile.mkstemp(prefix="doublr-whisper-", suffix=".jsonl")
+    os.close(fd)
+    progress = Path(name)
+    stop = threading.Event()
+
+    def watch():
+        pos = 0
+        while True:
+            finished = stop.wait(1.0)
+            try:
+                data = progress.read_text(encoding="utf-8")
+            except OSError:
+                data = ""
+            if len(data) < pos:  # relance sur processeur : le fichier repart de zéro
+                pos = 0
+            end = data.rfind("\n") + 1
+            for line in data[pos:end].splitlines():
+                try:
+                    item = json.loads(line)
+                except ValueError:
+                    continue
+                if on_unit and item.get("text"):
+                    on_unit(item["text"])
+                if on_progress and item.get("duration"):
+                    on_progress(float(item["end"]), float(item["duration"]))
+            pos = max(pos, end)
+            if finished:
+                return
+
+    watcher = threading.Thread(target=watch, daemon=True)
+    watcher.start()
+    try:
+        return worker.run_on_device("transcribe.transcribe_here", str(path), model_name, language, str(progress),
+                                    device=device, pool="whisper")
+    finally:
+        stop.set()
+        watcher.join(timeout=5)
+        progress.unlink(missing_ok=True)
 
 
-def transcribe_here(path: str, model_name: str, language: str | None, device: str) -> tuple[Transcript, list[str]]:
+def transcribe_here(path: str, model_name: str, language: str | None, progress_path: str | None,
+                    device: str) -> Transcript:
     model = _model(model_name, device)
     segments = info = None
     if _on_gpu(model):
@@ -152,14 +223,22 @@ def transcribe_here(path: str, model_name: str, language: str | None, device: st
     if segments is None:
         segments, info = model.transcribe(str(path), language=language, word_timestamps=True, vad_filter=True)
     words: list[Word] = []
-    texts: list[str] = []
-    for seg in segments:
-        for w in seg.words or []:
-            words.append(Word(start=float(w.start), end=float(w.end), word=w.word))
-        texts.append(seg.text.strip())
-    transcript = Transcript(language=info.language, language_probability=float(info.language_probability),
-                            units=group_words(words))
-    return transcript, texts
+    out = open(progress_path, "w", encoding="utf-8") if progress_path else None
+    try:
+        for seg in segments:
+            for w in seg.words or []:
+                words.append(Word(start=float(w.start), end=float(w.end), word=w.word))
+            if out:
+                out.write(json.dumps({"text": seg.text.strip(), "end": float(seg.end),
+                                      "duration": float(info.duration)}, ensure_ascii=False) + "\n")
+                out.flush()
+    finally:
+        if out:
+            out.close()
+    on_gpu = _on_gpu(model)
+    return Transcript(language=info.language, language_probability=float(info.language_probability),
+                      units=group_words(words), device="cuda" if on_gpu else "cpu",
+                      note="" if on_gpu or device == "cpu" else _gpu_note)
 
 
 def detect_language(path: Path, model_name: str = "large-v3", device: str = "auto") -> tuple[str, float] | None:
